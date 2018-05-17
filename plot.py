@@ -19,12 +19,6 @@ def x(xo, param, iters, plt):
         xo = xo*xo + param
         plt.scatter(param, xo, s=1)
 
-
-# Fixing random state for reproducibility
-np.random.seed(19680801)
-
-
-
 iters = 100
 stored = 100
 param_low = -2
