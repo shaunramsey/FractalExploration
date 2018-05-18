@@ -2,4 +2,4 @@
 We'll do our best to link them back here too!
 
 - The tent map bifurcation
-- ![tent map bifurcation image](https://github.com/shaunramsey/FractalExploration/blob/master/bifurcationplots/Tent_map_birfurcation.png)
+- ![tent map bifurcation image](https://github.com/shaunramsey/FractalExploration/blob/master/bifurcationplots/tent_map_birfurcation.png)
