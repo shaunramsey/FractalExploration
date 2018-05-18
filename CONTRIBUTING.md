@@ -1,0 +1,4 @@
+- Comment your code
+- Always add images for any image generating py that you publish
+- Always describe the function and the properties you're trying to portray in your py
+- TODO: add more to this file
