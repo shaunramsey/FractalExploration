@@ -1,4 +1,7 @@
-These are interesting iteration plots of 2 dimensional functions.
+These are interesting iteration plots of different iterations and functions.
+-Julia Set
+![Julia Set](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/julia_set.png)
+
 
 Henon Attractor
 - ![2d henon attractor image](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/henon_attractor.png)
@@ -15,5 +18,5 @@ Lorenz Attractor
 ![Lorenz Attractor 3D Plot](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/lorenz_attractor_4.png)
 
 Julia Set Images
-![Julia Set Paths on Unit Circle](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/Julia_Set_image.png)
-![Julia Set on Unit Circle]()
+![Julia Set](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/Julia_Set_image.png)
+![Julia Set on Unit Circle](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/julia_set_on_circle.png)
