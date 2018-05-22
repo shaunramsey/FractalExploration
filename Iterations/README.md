@@ -15,5 +15,5 @@ Lorenz Attractor
 ![Lorenz Attractor 3D Plot](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/lorenz_attractor_4.png)
 
 Julia Set Images
-![Julia Set Paths on Unit Circle](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/Julia_set_image.png)
+![Julia Set Paths on Unit Circle](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/Julia_Set_image.png)
 ![Julia Set on Unit Circle]()
