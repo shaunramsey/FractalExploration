@@ -19,4 +19,4 @@ Lorenz Attractor
 
 Julia Set Images
 ![Julia Set](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/Julia_Set_image.png)
-![Julia Set on Unit Circle](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/julia_set_on_circle.png)
+![Julia Set on Unit Circle](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/paths%20on%20unit%20circle%20of%20julia%20set.png)
