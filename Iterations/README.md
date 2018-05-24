@@ -1,5 +1,8 @@
 These are interesting iteration plots of different iterations and functions.
 
+-Julia Set Animation
+![Julia Set Animation](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/julia_set_animation2.png)
+
 -Mandelbrot Set
 ![Mandelbrot Set Image](https://github.com/shaunramsey/FractalExploration/blob/master/Iterations/Mandelbrot_Set.png)
 
