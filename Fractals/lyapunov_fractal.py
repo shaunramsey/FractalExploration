@@ -3,7 +3,7 @@ import numpy as np
 from numba import jit
 
 # PARAMETERS TO CHANGE THE FRACTAL GENERATED
-a = 12                        # length of continuous time intervals
+a = 1.2                        # length of continuous time intervals
 n = 3                           # n value in alternating time scale
 e_to_the_a = np.exp(a)          # e^a -- used for many equations
 
