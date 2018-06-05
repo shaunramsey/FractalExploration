@@ -6,6 +6,8 @@ import numpy as np
 #r = 3.3 # 2 cycle
 #r = 2  #everything goes to 1/2
 
+#does the actual cobwebplot
+#savetofig = True if you want to save every step of the cobwebplot to a diff file
 def cobwebplot_xo_r(r,x,color,n, savetofig=False):
     nx = r * np.multiply(x,  (-1*x + 1))
     plt.plot([x , x],[0,  nx], c=color)
@@ -27,6 +29,7 @@ def cobwebplot_xo_r(r,x,color,n, savetofig=False):
         #print(i, x)
     print(x)
 
+#makes the figure with the logistic equation and sets up all the figure options
 def makefig(r):        
     fig = plt.figure(figsize=(10.5, 8))
     ax = fig.gca()
@@ -48,13 +51,15 @@ def makefig(r):
     
     #plt.imshow(fractal_grid, vmax = 0.01, cmap = lyap_cmap, origin = "lower", extent = (lowerbound, upperbound, lowerbound, upperbound))
    
-    line = [[-0.01, maxy+0.1], [-0.01, maxy+0.1]]
-    xaxes = [0, 0,             -0.06, 1.01]
-    yaxes = [-0.06, maxy+0.01, 0, 0]
+    line = [[-0.01, maxy+0.1], [-0.01, maxy+0.1]] #line for y = x on the plt
+    xaxes = [0, 0,             -0.06, 1.01] #line for the x axis
+    yaxes = [-0.06, maxy+0.01, 0, 0] #line for the y axis
     #plt.grid(True)
-    xs = np.arange(-0.1, 1.1, 0.05) # try printing with 0.025
-    ys = np.arange(0,maxy+0.1, 0.05) # try printing with 0.025
-    xticks = []
+    xs = np.arange(-0.1, 1.1, 0.05) #  list of xticks 
+    ys = np.arange(0,maxy+0.1, 0.05) # list of yticks
+    xticks = [] #this is for the labels on the xticks
+    
+    # setting up the list of strings for the xtick labels
     for i in range(len(xs)):
         if i%2 == 1:
             xticks.append("")
@@ -62,35 +67,34 @@ def makefig(r):
             xticks.append(str(xs[i]))
             
     
-    ax.set_xticks(xs)
-    ax.set_yticks(ys)
-    ax.set_xticklabels(xticks)
-    plt.grid(True)
+    ax.set_xticks(xs) # set the x ticks (on the axis)
+    ax.set_yticks(ys) # set the y ticks (on the axis)
+    ax.set_xticklabels(xticks) #set the labels on the xticks
+    plt.grid(True)  #draw the grid
     
-    plt.plot(line[0], line[1], linestyle=":")
-    plt.plot(xaxes[0:2], yaxes[0:2], c="k")
-    plt.plot(xaxes[2:4], yaxes[2:4], c="k")
+    plt.plot(line[0], line[1], linestyle=":") # y=x
+    plt.plot(xaxes[0:2], yaxes[0:2], c="k")   # x axis in black
+    plt.plot(xaxes[2:4], yaxes[2:4], c="k")   # y axis in black
     plt.plot(x,y)
 
 
 
 #x = 0.26
-n = 500
 x = 0.7
 #x = 0.2549
-r = 3.9
-#r = 3.3
-#r = 2
+#r = 3.9 # use this for "chaos"
+r = 3.3 # use this for 2 cycle
+#r = 2  # use this for single stable fixed point
 
-n = 500
+n = 100
 
 
 makefig(r)
-cobwebplot_xo_r(r, 0.075, "b", n)
+#cobwebplot_xo_r(r, 0.075, "b", n)
 #cobwebplot_xo_r(r, 0.05, "c", n)
 #cobwebplot_xo_r(r, 0.3, "m", n)
-#cobwebplot_xo_r(r, 0.1, "m", n)
-#cobwebplot_xo_r(r, 0.5, "r", n)
+cobwebplot_xo_r(r, 0.1, "m", n)
+cobwebplot_xo_r(r, 0.5, "r", n)
 #cobwebplot_xo_r(r, 0.0, "k", n)
 #cobwebplot_xo_r(r, 0.02,"orange", 10)
 #cobwebplot_xo_r(r,x+0.00125, "m", n)
@@ -109,7 +113,9 @@ else:
     plt.figtext(0.82,0.4,"   Try the\n following\nx_0 values:\n------------------\nx_0 = 0.3\n\nx_0 = 0.8\n\nx_0 = 0.1\n\nx_0 = 0.5\n\nx_0 = 0.0\n\nx_0 = 0.01\n\nx_0 = 1.0",None,size=14)
 '''
 
-plt.savefig("webr=" + str(r) + ".pdf")
+#you can use png or .pdf for save fig to save to other file types. You can also
+# comment out this line if you don't want to save the figure to anything
+plt.savefig("webr=" + str(r) + ".png") # pass the option "True" if you want to save every step of the cobwebplot
 plt.show()
 
 
