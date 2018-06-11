@@ -6,7 +6,7 @@ SuPeR Fractal from Poulsen, Ramsey, Schwartz paper
 Stochastic AB Lyapunov fractal — in sequence "AB" there is a 50% chance at any time that the value will switch to the other (i.e., that A will switch to B and vice versa)
 ![Stochastic Fractal Image](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/lyapunov_fractal_stochastic.png)
 
-Probabilistic AB Lyapunov fractal - in sequence "AB" the probability that the value will switch varies and is listed above the graph
+Probabilistic AB Lyapunov fractal - in "AB" the probability that the value will switch varies is listed above the graph
 ![Lyapunov_Fractal_Image_Prob_0](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/lyapunov_fractal_probabilistic_AB_0.png)
 ![Lyapunov_Fractal_Image_Prob_25](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/lyapunov_fractal_probabilistic_AB_25.png)
 ![Lyapunov_Fractal_Image_Prob_75](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/lyapunov_fractal_probabilistic_AB_75.png)
