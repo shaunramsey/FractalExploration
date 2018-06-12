@@ -14,4 +14,4 @@ Probabilistic AB Lyapunov fractal - in "AB" the probability that the value will 
 ![Lyapunov_Fractal_Image_Prob_100](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/lyapunov_fractal_probabilistic_AB_100.png)
 
 Animation (created using ImageMagick and ArtistAnimation) of the fractal changing with the probability
-![Animated Lyapunov Fractal Image](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/Prob_Lyap_Fractal.gif)
+![Animated Lyapunov Fractal Image](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/Prob_Lyap_Fractal_Avg.gif)
