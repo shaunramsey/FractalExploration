@@ -87,7 +87,6 @@ for i in range(10):
 
 fractal_grid = np.average(lyap_exponents, axis = 0)
 
-lya
 
  # CREATING AND ADJUSTING GRAPH
 plt.figure()       # creating new window for each graph that is run
