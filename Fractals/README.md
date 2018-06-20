@@ -15,4 +15,3 @@ Probabilistic AB Lyapunov fractal - in "AB" the probability that the value will 
 
 Animation (created using ImageMagick and ArtistAnimation) of the fractal changing with the probability
 ![Animated Lyapunov Fractal Image](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/Prob_Lyap_Fractal_Avg.gif)
-
