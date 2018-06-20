@@ -3,14 +3,14 @@ import numpy as np
 from numba import jit
 
 # PARAMETERS TO CHANGE THE FRACTAL GENERATED
-a = 1.2                        # length of continuous time intervals
-n = 3                           # n value in alternating time scale
+a = 0.1                        # length of continuous time intervals
+n = 6                           # n value in alternating time scale
 e_to_the_a = np.exp(a)          # e^a -- used for many equations
 
 # PARAMETERS REFINING ACCURACY OF FRACTAL PICTURE GENERATED
-num_warmups = 120               # number of "warmups" or throwaway iterations before computing lyapunov exponent
-num_lyap_iterations = 2000      # number of iterations used to compute the lyapunov exp
-steps = 1000                     # steps between b1 and b2 values on axes -- higher it is, the better the picture
+num_warmups = 1200               # number of "warmups" or throwaway iterations before computing lyapunov exponent
+num_lyap_iterations = 100      # number of iterations used to compute the lyapunov exp
+steps = 500                     # steps between b1 and b2 values on axes -- higher it is, the better the picture
 
 # LOWER BOUND OF AREA OF INTEREST IN A TIME SCALE WITH THE SPECIFIED A VALUE
 @jit
@@ -87,11 +87,11 @@ for time_scale in points:
     
 fractal_grid = np.reshape(fractal_grid, (steps, steps)) # fractal_grid is then reshaped into a grid
 
-lyap_cmap = plt.get_cmap('cool')         # creating our own colormap to use "set_over" with    
+lyap_cmap = plt.get_cmap('nipy_spectral')         # creating our own colormap to use "set_over" with    
 lyap_cmap.set_over('black')                 # any value over vmax is colored black
 
 plt.suptitle("Lyanpuov fractal for Alternating Pulse Time Scale")
 plt.title("a = " + str(a) + ", n = " + str(n))
 plt.xlabel("b1")
 plt.ylabel("b2")
-plt.imshow(fractal_grid, cmap = lyap_cmap, origin = "lower", extent = (lowerbound, upperbound, lowerbound, upperbound))
+plt.imshow(fractal_grid, cmap = lyap_cmap, origin = "lower", vmax=0, extent = (lowerbound, upperbound, lowerbound, upperbound))
