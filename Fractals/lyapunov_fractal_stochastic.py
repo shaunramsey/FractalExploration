@@ -20,7 +20,6 @@ b_ub = 4                       # b upper bound
 # PARAMETERS REFINING ACCURACY OF FRACTAL PICTURE GENERATED
 num_warmups = 1200             # number of "warmups" or throwaway iterations before computing lyapunov exponent
 num_lyap_iterations = 200      # number of iterations used to compute the lyapunov exp
-
 steps = 500                   # steps between b1 and b2 values on axes -- higher it is, the better the picture
 
 # CREATING RANDOM SEQUENCE WITH A LENGTH OF THE TOTAL NUMBER OF ITERATIONS
@@ -32,7 +31,6 @@ def getrandomseq():
         problist.append(random.randint(0,1))
     return problist
 
-
 # LOGISTIC MAP THAT GIVES US THE NEXT X
 @jit
 def F(x, b):
@@ -42,7 +40,6 @@ def F(x, b):
 @jit
 def Fprime(x, b):
     return b * (1 - (2 *x))
-
  
 # RETURNS THE CORRECT B-VALUE BASED ON THE CURRENT ITERATION
 @jit
@@ -54,9 +51,7 @@ def getseqval(curr_iteration, b1, b2, seqlist):
 
 # RETURNS THE LYAPUNOV EXPONENT BASED ON THE SPECIFIED B1 AND B2 VALUES
 @jit
-
 def getlyapexponent(time_scale, seqlist):
-
     b1, b2 = time_scale
     
     x = .5          # initial value of x
@@ -65,7 +60,6 @@ def getlyapexponent(time_scale, seqlist):
     # do warmups, to discard the early values of the iteration to allow the orbit to settle down
     for i in range(num_warmups):
         x = F(x, getseqval(i, b1, b2, seqlist))
-
         
     
     for i in range(num_warmups, num_lyap_iterations + num_warmups):
@@ -73,7 +67,6 @@ def getlyapexponent(time_scale, seqlist):
         lyapsum += np.log( np.abs(Fprime(x, getseqval(i, b1, b2, seqlist) ) ) )
         # get next x
         x = F(x, getseqval(i, b1, b2, seqlist))
-
     
     return (lyapsum / num_lyap_iterations)
 
@@ -82,7 +75,6 @@ a = np.linspace(a_lb, a_ub, steps)   #range of b1 values
 b = np.linspace(b_lb, b_ub, steps)   #range of b2 values
 aa, bb = np.meshgrid(a, b)
             
-
 # COMPUTING AVERAGE IMAGE FROM MULTIPLE RANDOM SEQUENCES        
 lyap_exponents = []
 for i in range(10):
@@ -107,4 +99,3 @@ plt.colorbar(image)
 end = timer()
 
 print("elapsed time: " + str(end - start))
-
