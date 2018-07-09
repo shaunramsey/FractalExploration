@@ -3,7 +3,7 @@ We have recreated the original Markus-Lyapunov fractal ([https://en.wikipedia.or
 ### Stochastic AB Lyapunov fractal — in sequence "AB" there is a 50% chance at any time that the value will switch to the other (i.e., that A will switch to B and vice versa)
 ![Stochastic Fractal Image](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/Markus-Lyapunov%20Fractals/lyapunov_fractal_stochastic.png)
 
-### Probabilistic AB Lyapunov fractal - in "AB" the probability that the value will switch varies is listed above the graph
+### Probabilistic AB Lyapunov fractal -- in "AB" the probability that the value will switch varies is listed above the graph
 ![Lyapunov_Fractal_Image_Prob_0](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/Markus-Lyapunov%20Fractals/lyapunov_fractal_probabilistic_AB_0.png)
 ![Lyapunov_Fractal_Image_Prob_25](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/Markus-Lyapunov%20Fractals/lyapunov_fractal_probabilistic_AB_25.png)
 ![Lyapunov_Fractal_Image_Prob_75](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/Markus-Lyapunov%20Fractals/lyapunov_fractal_probabilistic_AB_75.png)
@@ -12,6 +12,9 @@ We have recreated the original Markus-Lyapunov fractal ([https://en.wikipedia.or
 
 ### Animation (created using ImageMagick and ArtistAnimation) of the fractal changing with the probability
 ![Animated Lyapunov Fractal Image](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/Markus-Lyapunov%20Fractals/Prob_Lyap_Fractal_Avg.gif)
+
+## 2D Travesal of 3D Lyapunov space -- each frame is the a-b fractal generated for that fixed value of c
+![Animated Lyapunov Fractal Image](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/Markus-Lyapunov%20Fractals/Lyap_3D_slice.gif)
 
 
 
