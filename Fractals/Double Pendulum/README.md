@@ -1,0 +1,1 @@
+We have adapted the matplotlib code given at [https://matplotlib.org/examples/animation/double_pendulum_animated.html](https://matplotlib.org/examples/animation/double_pendulum_animated.html) to create and study a simulation of a double pendulum. 
