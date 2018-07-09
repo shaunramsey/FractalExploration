@@ -7,24 +7,25 @@ start = timer()
 
 # PARAMETERS TO CHANGE THE FRACTAL GENERATED
 seq = "AB"                     # sequence to alternate r values
-probability = 100               # probability that a given value in the sequence will switch
-a_lb = 2                       # b1 lower bound
-a_ub = 4                       # b1 upper bound
-b_lb = 2                       # b2 lower bound
-b_ub = 4                       # b2 upper bound
+probability = 75               # probability that a given value in the sequence will switch
+a_lb = 2                       # a lower bound
+a_ub = 4                       # a upper bound
+b_lb = 2                       # b lower bound
+b_ub = 4                       # b upper bound
 
 # PARAMETERS REFINING ACCURACY OF FRACTAL PICTURE GENERATED
 num_warmups = 1200             # number of "warmups" or throwaway iterations before computing lyapunov exponent
 num_lyap_iterations = 300      # number of iterations used to compute the lyapunov exp
 steps = 500                    # steps between b1 and b2 values on axes -- higher it is, the better the picture
 
-random.seed(9001)
 # CREATING RANDOM SEQUENCE WITH A LENGTH OF THE TOTAL NUMBER OF ITERATIONS
 # EACH ITERATION THE PROBABILITY WILL BE JUDGED AGAINST THIS LIST
-problist = list()    
-for i in range(num_lyap_iterations + num_warmups):
-    problist.append(random.randint(0,99))
-
+@jit
+def getrandomseq():    
+    problist = list()    
+    for i in range(num_lyap_iterations + num_warmups):
+        problist.append(random.randint(0,99))
+    return problist
 
 # LOGISTIC MAP THAT GIVES US THE NEXT X
 @jit
@@ -38,7 +39,7 @@ def Fprime(x, curr_r):
  
 # RETURNS THE CORRECT B-VALUE BASED ON THE CURRENT ITERATION
 @jit
-def getseqval(curr_iteration, a, b, probability):
+def getseqval(curr_iteration, a, b, probability, problist):
     randnum = problist[curr_iteration]
     index = np.mod(curr_iteration, len(seq))
     if (seq[index] == 'A'):
@@ -54,23 +55,22 @@ def getseqval(curr_iteration, a, b, probability):
 
 # RETURNS THE LYAPUNOV EXPONENT BASED ON THE SPECIFIED B1 AND B2 VALUES
 @jit
-def getlyapexponent(time_scale, probability):
+def getlyapexponent(time_scale, probability, problist):
     b1, b2 = time_scale
     lyap_prob = probability
-    #print("b1", b1, "b2", b2, "prob", lyap_prob)
     
     x = .5          # initial value of x
     lyapsum = 0     # initializing lyapunov sum for use later
     
     # do warmups, to discard the early values of the iteration to allow the orbit to settle down
     for i in range(num_warmups):
-        x = F(x, getseqval(i, b1, b2, lyap_prob))
+        x = F(x, getseqval(i, b1, b2, lyap_prob, problist))
         
     
     for i in range(num_warmups, num_lyap_iterations + num_warmups):
-        lyapsum += np.log( np.abs(Fprime(x, getseqval(i, b1, b2, lyap_prob) ) ) )
+        lyapsum += np.log( np.abs(Fprime(x, getseqval(i, b1, b2, lyap_prob, problist) ) ) )
         # get next x
-        x = F(x, getseqval(i, b1, b2, lyap_prob))
+        x = F(x, getseqval(i, b1, b2, lyap_prob, problist))
     
     return (lyapsum / num_lyap_iterations)
 
@@ -79,10 +79,14 @@ a = np.linspace(a_lb, a_ub, steps)   #range of b1 values
 b = np.linspace(b_lb, b_ub, steps)   #range of b2 values
 aa, bb = np.meshgrid(a, b)
             
-fractal_grid = getlyapexponent( (bb, aa), probability )
+# COMPUTING AVERAGE IMAGE FROM MULTIPLE RANDOM SEQUENCES        
+lyap_exponents = []
+for i in range(10):
+    problist = getrandomseq()
+    lyap_exponents.append(getlyapexponent( (bb, aa), probability, problist ))
 
-lyap_cmap = plt.get_cmap('nipy_spectral')  # creating our own colormap to use "set_over" with    
-lyap_cmap.set_over('black')              # any value over vmax is colored black
+fractal_grid = np.average(lyap_exponents, axis = 0)
+
 
  # CREATING AND ADJUSTING GRAPH
 plt.figure()       # creating new window for each graph that is run
@@ -94,8 +98,9 @@ plt.title("Pattern: " + seq + "\n Probability that a given value\n in the patter
 plt.xlabel("a")
 plt.ylabel("b")
 
-plt.imshow(fractal_grid, cmap = lyap_cmap, vmax = 0, origin = "lower", extent = (a_lb, a_ub, b_lb, b_ub))
+im = plt.imshow(fractal_grid, cmap = lyap_cmap, vmin = -2, vmax = 0, origin = "lower", extent = (a_lb, a_ub, b_lb, b_ub))
+plt.colorbar(im)
 
 end = timer()
 
-print("elapsed time for meshgrid: " + str(end - start))
+print("elapsed time: " + str(end - start))
