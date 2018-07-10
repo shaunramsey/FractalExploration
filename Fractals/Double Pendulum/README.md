@@ -11,3 +11,9 @@ This is not really a "bifurcation" of the double pendulum, as nothing here seems
 
 #### Animation of Bifurcation
 ![Bifur Animation](Double_Pend_Bifur_Animation_3.gif)
+
+#### Double Pendulum Fractal
+
+We recreate the graph of time it takes for the double pendulum to flip over. This image is a recreation, originally done by Jeremy S. Heyl 
+White represents that the double pendulum does not flip within 10000 √(l⁄g)
+![Fractal 100](Dpend_Fractal_100.png)
