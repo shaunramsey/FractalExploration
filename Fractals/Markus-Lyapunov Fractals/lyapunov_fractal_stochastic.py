@@ -20,7 +20,7 @@ b_ub = 4                       # b upper bound
 # PARAMETERS REFINING ACCURACY OF FRACTAL PICTURE GENERATED
 num_warmups = 1200             # number of "warmups" or throwaway iterations before computing lyapunov exponent
 num_lyap_iterations = 200      # number of iterations used to compute the lyapunov exp
-steps = 500                   # steps between b1 and b2 values on axes -- higher it is, the better the picture
+steps = 1000                   # steps between b1 and b2 values on axes -- higher it is, the better the picture
 
 # CREATING RANDOM SEQUENCE WITH A LENGTH OF THE TOTAL NUMBER OF ITERATIONS
 # EACH ITERATION THE PROBABILITY WILL BE JUDGED AGAINST THIS LIST
@@ -33,13 +33,17 @@ def getrandomseq():
 
 # LOGISTIC MAP THAT GIVES US THE NEXT X
 @jit
-def F(x, b):
-    return (b * x) * (1 - x)
+def F(x, curr_r):
+    return (curr_r * x) * (1 - x)
 
 # DERIVATIVE OF F -- USED TO COMPUTE THE LYAPUNOV EXPONENT
 @jit
-def Fprime(x, b):
-    return b * (1 - (2 *x))
+def Fprime(x, curr_r):
+    ans = curr_r * (1 - (2 *x))
+    ans[ans == 0] = 0.0001
+    ans[ans == -np.inf] = -1000
+    ans[ans == np.inf] = 1000
+    return ans
  
 # RETURNS THE CORRECT B-VALUE BASED ON THE CURRENT ITERATION
 @jit
@@ -52,21 +56,21 @@ def getseqval(curr_iteration, b1, b2, seqlist):
 # RETURNS THE LYAPUNOV EXPONENT BASED ON THE SPECIFIED B1 AND B2 VALUES
 @jit
 def getlyapexponent(time_scale, seqlist):
-    b1, b2 = time_scale
+    a, b = time_scale
     
     x = .5          # initial value of x
     lyapsum = 0     # initializing lyapunov sum for use later
     
     # do warmups, to discard the early values of the iteration to allow the orbit to settle down
     for i in range(num_warmups):
-        x = F(x, getseqval(i, b1, b2, seqlist))
+        x = F(x, getseqval(i, a, b, seqlist))
         
     
     for i in range(num_warmups, num_lyap_iterations + num_warmups):
         #print("i", i)
-        lyapsum += np.log( np.abs(Fprime(x, getseqval(i, b1, b2, seqlist) ) ) )
+        lyapsum += np.log( np.abs(Fprime(x, getseqval(i, a, b, seqlist) ) ) )
         # get next x
-        x = F(x, getseqval(i, b1, b2, seqlist))
+        x = F(x, getseqval(i, a, b, seqlist))
     
     return (lyapsum / num_lyap_iterations)
 
