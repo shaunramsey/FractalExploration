@@ -35,7 +35,11 @@ def F(x, curr_r):
 # DERIVATIVE OF F -- USED TO COMPUTE THE LYAPUNOV EXPONENT
 @jit
 def Fprime(x, curr_r):
-     return curr_r * (1 - (2 *x))
+    ans = curr_r * (1 - (2 *x))
+    ans[ans == 0] = 0.0001
+    ans[ans == -np.inf] = -1000
+    ans[ans == np.inf] = 1000
+    return ans
  
 # RETURNS THE CORRECT B-VALUE BASED ON THE CURRENT ITERATION
 @jit
