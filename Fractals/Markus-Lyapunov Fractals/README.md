@@ -13,7 +13,7 @@ We have recreated the original Markus-Lyapunov fractal ([https://en.wikipedia.or
 ### Animation (created using ImageMagick and ArtistAnimation) of the fractal changing with the probability
 ![Animated Lyapunov Fractal Image](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/Markus-Lyapunov%20Fractals/Prob_Lyap_Fractal_Avg.gif)
 
-## 2D Travesal of 3D Lyapunov space -- each frame is the a-b fractal generated for that fixed value of c
+## 2D Traversal of 3D Lyapunov space -- each frame is the a-b fractal generated for that fixed value of c
 ![Animated Lyapunov Fractal Image](https://github.com/r-chambers/FractalExploration/blob/master/Fractals/Markus-Lyapunov%20Fractals/Lyap_3D_slice.gif)
 
 
