@@ -3,7 +3,7 @@
 """
 Created on Wed May 30 13:07:22 2018
 The Lyapunov logistic fractal using Fprime to determine when a pattern is found when calculating the Lyapunov 
-Exponent. We use the number of times to show the bifurcation
+Exponent. We use the number of times to show the bifurcation of the fractal
 @author: Michelle
 """
 
