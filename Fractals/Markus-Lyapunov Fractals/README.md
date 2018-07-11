@@ -16,7 +16,12 @@ We have recreated the original Markus-Lyapunov fractal ([https://en.wikipedia.or
 ## 2D Traversal of 3D Lyapunov space -- each frame is the a-b fractal generated for that fixed value of c
 ![Animated Lyapunov Fractal Image](Lyap_3D_slice.gif)
 
+## Using Fprime to Determine the Bifurcation Pattern of the Lyapunov Fractal
+![Fprime Lyapunov Fractal Number of Bifurcations](Num_Bifurcations_Lyapunov_Fractal.png)
 
 
-
-
+## Finding the Relative Difference between Lyapunov Exponents in a Single Fractal
+![Original_Fractal](Lyapunov_Logistic_Fractal.png)
+![Original Relative Difference](Relative_Difference_Fractal.png)
+![Relative Difference with changes where RD > Epsilon](Relative_Difference_Fractal_Changes_Above_Epsilon.png)
+![Number of Changes](Relative_Diff_Fractal_Num_Changes.png)
