@@ -16,9 +16,14 @@ We have recreated the original Markus-Lyapunov fractal ([https://en.wikipedia.or
 ## 2D Traversal of 3D Lyapunov space -- each frame is the a-b fractal generated for that fixed value of c
 ![Animated Lyapunov Fractal Image](Lyap_3D_slice.gif)
 
+## 3D projection of Lyapunov space -- x-axis = a, y-axis = b, z-axis = c
+If you'll look at the first image, you will see the first frame of the above animation represented in the face of the cube. The white pixels--representing the border of chaos--have been replace by translucent blue voxels for easier view of the inside structure. Chaotic voxels are completely transparent.
+![3D_Lyap_Fractal](3D_Lyapunov_Fractal.png)
+![3D_Lyap_Fractal_2](3D_Lyapunov_Fractal_2.png)
+![3D_Lyap_Fractal_3](3D_Lyapunov_Fractal_3.png)
+
 ## Using Fprime to Determine the Bifurcation Pattern of the Lyapunov Fractal
 ![Fprime Lyapunov Fractal Number of Bifurcations](Num_Bifurcations_Lyapunov_Fractal.png)
-
 
 ## Finding the Relative Difference between Lyapunov Exponents in a Single Fractal
 ![Original_Fractal](Lyapunov_Logistic_Fractal.png)
