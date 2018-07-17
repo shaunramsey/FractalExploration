@@ -27,6 +27,8 @@ If you look at the first image, you will see the first frame of the above animat
 ![3D_Lyap_Fractal_2](3D_Lyapunov_Fractal_2.png)
 ### Back face
 ![3D_Lyap_Fractal_3](3D_Lyapunov_Fractal_3.png)
+### Animation of rotating fractal
+![Anim_Rotating_Fractal](Anim_3D_Fractal_ABC.gif)
 
 ## Using Fprime to Determine the Bifurcation Pattern of the Lyapunov Fractal
 ![Fprime Lyapunov Fractal Number of Bifurcations](Num_Bifurcations_Lyapunov_Fractal.png)
