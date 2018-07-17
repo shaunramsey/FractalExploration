@@ -4,9 +4,11 @@ Adapted from VisPy example volume rendering here: https://github.com/vispy/vispy
 NOTE: Normalization approach credited to Etienne Cmb on Stack Overflow: https://stackoverflow.com/questions/51306488/transparency-with-voxels-in-vispy/51309283#51309283
 '''
 
+
 from numba import jit
 import numpy as np
 
+import imageio
 from vispy import app, scene
 from vispy.color import Colormap
 
@@ -19,6 +21,7 @@ Computing Fractal
 '''
 
 # PARAMETERS TO CHANGE THE FRACTAL GENERATED
+anim = True     # change whether to produce a .gif animation of fractal rotating
 seq = "ABC"     # sequence to alternate r values
 a_lb = 2        # a lower bound
 a_ub = 4        # a upper bound
@@ -93,6 +96,10 @@ def normalize(data, boundary_old):
     
     return data, boundary_norm
 
+'''
+Creating and Preparing 3D Fractal Data
+'''
+
 # CREATING FRACTAL IMAGE 
 a = np.linspace(a_lb, a_ub, steps)   #range of b1 values
 b = np.linspace(b_lb, b_ub, steps)   #range of b2 values
@@ -106,14 +113,17 @@ fractal_3D = getlyapexponent(aa, bb, cc)
 fractal_3D, chaotic_boundary = normalize(fractal_3D, 0.0)
 print("chaotic boundary:", chaotic_boundary)
 
+'''
+Creating 3D projection of data
+'''
+
 # Prepare canvas
 canvas = scene.SceneCanvas(keys='interactive', size=(800, 600), show=True)
 
 # Set up a viewbox to display the image with interactive pan/zoom
 view = canvas.central_widget.add_view()
-camera = scene.cameras.ArcballCamera(parent=view.scene, fov=60, scale_factor=steps*1.5, center = (steps/2, steps/2, steps/2))
+camera = scene.cameras.ArcballCamera(parent=view.scene, fov=60, scale_factor=steps*3, center = (steps/4, steps/4, steps/4))
 view.camera = camera  
-
 
 # Create the volume
 volume = scene.visuals.Volume(fractal_3D, clim=(0, 1), method='translucent', parent=view.scene, threshold=0.225,emulate_texture=False)
@@ -126,6 +136,27 @@ fractal_map = Colormap(fractal_colors, controls=color_control_pts, interpolation
 
 # Assigning newly made color map to volume data
 volume.cmap = fractal_map
+
+
+''' Creating animation of rotating fractal '''
+if anim:
+    file_name = "Anim_3D_Fractal_" + seq + ".gif"
+    writer = imageio.get_writer(file_name)
+    
+    
+    # Parameters to change animation
+    angle_delta = 10.0  # amount to rotate fractal by each frame
+    axes = [[1, 1, 0], [1, .5, .5], [1, 0, 1], [.5, 0, 1], [1, .5, .5]]  # axes to rotate fractal on, in succession
+    
+    for axis in axes:
+        for rotate in range(int(360/angle_delta)):
+            im = canvas.render()
+            writer.append_data(im)
+            view.camera.transform.rotate(angle_delta, axis)
+    writer.close()
+    
+
+''' Run program '''
 
 if __name__ == '__main__':
     print(__doc__)
