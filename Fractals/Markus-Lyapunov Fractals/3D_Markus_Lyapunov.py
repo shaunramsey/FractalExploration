@@ -1,3 +1,9 @@
+'''
+Adapted from VisPy example volume rendering here: https://github.com/vispy/vispy/blob/master/examples/basics/scene/volume.py
+
+NOTE: Normalization approach credited to Etienne Cmb on Stack Overflow: https://stackoverflow.com/questions/51306488/transparency-with-voxels-in-vispy/51309283#51309283
+'''
+
 from numba import jit
 import numpy as np
 
