@@ -23,7 +23,7 @@ If you look at the first image, you will see the first frame of the above animat
 
 ### Front face
 ![3D_Lyap_Fractal](3D_Lyapunov_Fractal.png)
-### Turned 90 degrees
+### Turned 60 degrees
 ![3D_Lyap_Fractal_2](3D_Lyapunov_Fractal_2.png)
 ### Back face
 ![3D_Lyap_Fractal_3](3D_Lyapunov_Fractal_3.png)
