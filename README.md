@@ -11,4 +11,4 @@ Then we'll recreate the SuPeR Fractal from Professor Ramsey's paper as well as t
 # Logistic Fractal
 ![Logistic Fractal](https://github.com/shaunramsey/FractalExploration/blob/master/Fractals/Markus-Lyapunov%20Fractals/Lyapunov_Logistic_Fractal.png)
 
-From here we'll experiment with different characteristics of the fractals, creating different images. 
+From here we'll experiment with different characteristics of the fractals, creating different images. These variations can be found in the Fractals folder.
