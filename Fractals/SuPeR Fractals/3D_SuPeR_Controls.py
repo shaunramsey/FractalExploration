@@ -141,16 +141,17 @@ Creating 3D projection of data
 
 # Prepare canvas
 canvas = scene.SceneCanvas(keys='interactive', size=(800, 600), show=True)
+canvas.measure_fps()
 
 # Set up a viewbox to display the image with interactive pan/zoom
 view = canvas.central_widget.add_view()
-camera = scene.cameras.ArcballCamera(parent=view.scene, fov=60, scale_factor=steps*3, center = (steps/4, steps/4, steps/4))
+camera = scene.cameras.ArcballCamera(parent=view.scene, fov=60, scale_factor=steps*3, center = (0, 0, 0))
 view.camera = camera  
-
-rotate_timer = app.Timer(interval=0.1)
 
 # Create the volume
 volume = scene.visuals.Volume(fractal_3D, clim=(0, 1), method='translucent', parent=view.scene, threshold=0.225,emulate_texture=False)
+
+volume.transform = scene.STTransform(translate=(-steps//2, -steps//2, -steps//2))
 
 # Creating color map to display fractal
 fractal_colors = [(1, 0, 1, .5), (0, 0, 1, .5), (.1, .8, .8, .3), (.1, 1, .1, .3), (1, 1, 0, .2), (1, 0, 0, .1), (0, 1, 1, (1 - chaotic_boundary) / 7), (0, 1, .8, (1 - chaotic_boundary) / 8), (0, 0, 0, 0), (0, 0, 0, 0)]
@@ -203,7 +204,7 @@ def on_key_press(event):
 
 ''' Creating animation of rotating fractal '''
 if anim:
-    file_name = "Anim_3D_Fractal_a" + str(a) + "_n" + str(n) + ".gif"
+    file_name = "Anim_3D_Fractal_a" + str(a) + "_n" + str(n) + "_steps" + str(steps) + ".gif"
     writer = imageio.get_writer(file_name)
     
     # Parameters to change animation

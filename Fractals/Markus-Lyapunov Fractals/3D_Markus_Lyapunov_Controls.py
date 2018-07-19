@@ -1,3 +1,4 @@
+
 '''
 This is a version of 3D_Markus_Lyapunov.py, but with controls to create an animation or save a still image. It can be significantly slower than 3D_Markus_Lyapunov.py, so it is included as a seperate file.
 
@@ -34,7 +35,7 @@ Computing Fractal
 
 # PARAMETERS TO CHANGE THE FRACTAL GENERATED
 anim = False        # change whether to produce a .gif animation of fractal rotating
-seq = "CACCABAC"    # sequence to alternate r values
+seq = "ABC"    # sequence to alternate r values
 a_lb = 2            # a lower bound
 a_ub = 4            # a upper bound
 b_lb = 2            # b lower bound
@@ -45,7 +46,7 @@ c_ub = 4            # c upper bound
 # PARAMETERS REFINING ACCURACY OF FRACTAL PICTURE GENERATED
 num_warmups = 100             # number of "warmups" or throwaway iterations before computing lyapunov exponent
 num_lyap_iterations = 100     # number of iterations used to compute the lyapunov exp
-steps = 100                   # steps between b1 and b2 values on axes -- higher it is, the better the picture
+steps = 120                   # steps between b1 and b2 values on axes -- higher it is, the better the picture
 
 # LOGISTIC MAP THAT GIVES US THE NEXT X
 @jit
@@ -132,14 +133,17 @@ Creating 3D projection of data
 
 # Prepare canvas
 canvas = scene.SceneCanvas(keys='interactive', size=(800, 600), show=True)
+canvas.measure_fps()
 
 # Set up a viewbox to display the image with interactive pan/zoom
 view = canvas.central_widget.add_view()
-camera = scene.cameras.ArcballCamera(parent=view.scene, fov=60, scale_factor=steps*3, center = (steps/4, steps/4, steps/4))
+camera = scene.cameras.ArcballCamera(parent=view.scene, fov=60, scale_factor=steps*3, center = (0, 0, 0))
 view.camera = camera  
 
 # Create the volume
 volume = scene.visuals.Volume(fractal_3D, clim=(0, 1), method='translucent', parent=view.scene, threshold=0.225,emulate_texture=False)
+
+volume.transform = scene.STTransform(translate=(-steps//2, -steps//2, -steps//2))
 
 # Creating color map to display fractal
 fractal_colors = [(1, 0, 1, .5), (0, 0, 1, .5), (.1, .8, .8, .3), (.1, 1, .1, .3), (1, 1, 0, .2), (1, 0, 0, .1), (1, 1, 1, (1 - chaotic_boundary) / 7), (0, 1, .8, (1 - chaotic_boundary) / 8), (0, 0, 0, 0), (0, 0, 0, 0)]
@@ -158,9 +162,9 @@ Implementing key press
 '''
 
 # Initializing text and variables
-save_text = Text('Saved still image', parent=canvas.scene, color=(1, 1, 1, 0)) # starts off invisible
+save_text = Text('Saved still image', parent=canvas.scene, color=(1, 1, 1, 0), anchor_x = 'left', anchor_y = 'top') # starts off invisible
 save_text.font_size = 15
-save_text.pos = (100, 30)
+save_text.pos = canvas.size[0] // 22, canvas.size[1] // 22
 still_num = 1
 num_frames = 20
 fade_out = Timer(interval = 0.07, iterations = num_frames)
@@ -195,7 +199,8 @@ Creating animation of rotating fractal
 '''
 
 if anim:
-    file_name = "Anim_3D_Fractal_" + seq + ".gif"
+    file_name = "Anim_3D_Fractal_" + seq + "_steps" + str(steps) + ".gif"
+
     writer = imageio.get_writer(file_name)
     
     
@@ -222,3 +227,4 @@ if __name__ == '__main__':
     
 end = timer()
 print("elapsed time: " + str(end - start))
+
