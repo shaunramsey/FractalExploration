@@ -204,7 +204,7 @@ def on_key_press(event):
 
 ''' Creating animation of rotating fractal '''
 if anim:
-    file_name = "Anim_3D_Fractal_a" + str(a) + "_n" + str(n) + ".gif"
+    file_name = "Anim_3D_Fractal_a" + str(a) + "_n" + str(n) + "_steps" + str(steps) + ".gif"
     writer = imageio.get_writer(file_name)
     
     # Parameters to change animation

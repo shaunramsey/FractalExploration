@@ -199,7 +199,8 @@ Creating animation of rotating fractal
 '''
 
 if anim:
-    file_name = "Anim_3D_Fractal_" + seq + ".gif"
+    file_name = "Anim_3D_Fractal_" + seq + "_steps" + str(steps) + ".gif"
+
     writer = imageio.get_writer(file_name)
     
     
