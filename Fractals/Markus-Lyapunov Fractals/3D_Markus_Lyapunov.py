@@ -105,7 +105,7 @@ a = np.linspace(a_lb, a_ub, steps)   #range of b1 values
 b = np.linspace(b_lb, b_ub, steps)   #range of b2 values
 c = np.linspace(c_lb, c_ub, steps)
 
-aa, bb, cc = np.meshgrid(a, b, c)
+aa, bb, cc = np.meshgrid(a, b, c, indexing='ij')
 
 fractal_3D = getlyapexponent(aa, bb, cc)
 
