@@ -7,6 +7,7 @@ Adapted from VisPy example volume rendering here: https://github.com/vispy/vispy
 Controls:
     set anim under CONTROLS to True - save .gif of rotating fractal
     set load_file under CONTROLS to file path - load .npy data into canvas
+    set save_data under CONTROLS tp True = save fractal data to .npy file
     'l' - load fractal data into canvas
     'e' - export fractal data to .npy file
     's' - save still from canvas to .png
@@ -45,13 +46,14 @@ Computing Fractal
 # CONTROLS
 anim = False        # change whether to produce a .gif animation of fractal rotating
 load_data = None    # change to complete path of .npy file to load fractal data
+save_data = True    # change whether to automatically export data into .npy file
 
 # PARAMETERS TO CHANGE THE FRACTAL GENERATED
 seq = "ABC"    # sequence to alternate r values
 a_lb = 2            # a lower bound
 a_ub = 4            # a upper bound
 b_lb = 2            # b lower bound
-b_ub = 12            # b upper bound
+b_ub = 4            # b upper bound
 c_lb = 2            # c lower bound
 c_ub = 4            # c upper bound
 
@@ -144,8 +146,17 @@ if load_data == None:
     aa, bb, cc = np.meshgrid(a, b, c, indexing = 'ij') # meshgrid return y, x, z
     
     fractal_data = getlyapexponent(aa, bb, cc)
+    
+    # if save_data is set to true, save data as .npy file
+    if save_data:
+        # export data created in this program
+        file_name = "3D_Fractal_" + seq + "_steps" + str(steps)
+        np.save(file_name, fractal_data, allow_pickle=False)
 else:
     fractal_data = np.load(load_data)
+
+
+
 
 # normalize data between 0 and 1 to be displayed and return chaotic boundary
 fractal_3D, chaotic_boundary = normalize(fractal_data, 0.0)
@@ -276,6 +287,7 @@ def on_key_press(event):
             
             # make new volume from normalized fractal data
             volume = scene.visuals.Volume(fractal_3D, clim=(0, 1), method='translucent', parent=view.scene, threshold=0.225, cmap=fractal_map, emulate_texture=False)
+            volume.transform = scene.STTransform(translate=(-steps//2, -steps//2, -steps//2))
             
         # display user message
         fade_out.start()

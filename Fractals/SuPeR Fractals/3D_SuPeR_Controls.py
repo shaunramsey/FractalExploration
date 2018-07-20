@@ -1,4 +1,3 @@
-
 '''
 This is a version of 3D_SuPeR.py, but with controls to create an animation or save a still image. It can be significantly slower than 3D_SuPeR.py, so it is included as a seperate file.
 
@@ -7,6 +6,7 @@ Adapted from VisPy example volume rendering here: https://github.com/vispy/vispy
 Controls:
     set anim under CONTROLS to True - save .gif of rotating fractal
     set load_file under CONTROLS to file path - load .npy data into canvas
+    set save_data under CONTROLS tp True = save fractal data to .npy file
     'l' - load fractal data into canvas
     'e' - export fractal data to .npy file
     's' - save still from canvas to .png
@@ -44,6 +44,7 @@ Computing Fractal
 # CONTROLS
 anim = False        # change whether to produce a .gif animation of fractal rotating
 load_data = None    # change to complete path of .npy file to load fractal data
+save_data = True    # change whether to automatically export data into .npy file
 
 # PARAMETERS TO CHANGE THE FRACTAL GENERATED
 a = 4.3                     # length of continuous time intervals
@@ -154,6 +155,13 @@ if load_data == None:
     bb2, bb1, bb3 = np.meshgrid(b1, b2, b3) # meshgrid return y, x, z
     
     fractal_data = getlyapexponent( (bb1, bb2, bb3) )
+    
+     # if save_data is set to true, save data as .npy file
+    if save_data:
+        # export data created in this program
+        file_name = "3D_Fractal_a" + str(a) + "n" + str(n) + "_steps" + str(steps)
+        np.save(file_name, fractal_data, allow_pickle=False)
+        
 else:
     fractal_data = np.load(load_data)
 # Normalize data between 0 and 1 to be displayed and return chaotic boundary
@@ -285,6 +293,7 @@ def on_key_press(event):
             
             # make new volume from normalized fractal data
             volume = scene.visuals.Volume(fractal_3D, clim=(0, 1), method='translucent', parent=view.scene, threshold=0.225, cmap=fractal_map, emulate_texture=False)
+            volume.transform = scene.STTransform(translate=(-steps//2, -steps//2, -steps//2))
             
         # display user message
         fade_out.start()
