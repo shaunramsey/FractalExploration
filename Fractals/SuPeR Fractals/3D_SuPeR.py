@@ -113,7 +113,7 @@ b1 = np.linspace(lowerbound, upperbound, steps)   # range of b1 values
 b2 = np.linspace(lowerbound, upperbound, steps)   # range of b2 values
 b3 = np.linspace(lowerbound, upperbound, steps)   # range of b3 values
 
-bb1, bb2, bb3 = np.meshgrid(b1, b2, b3)
+bb1, bb2, bb3 = np.meshgrid(b1, b2, b3, indexing='ij')
 
 fractal_3D = getlyapexponent( (bb1, bb2, bb3) )
 
