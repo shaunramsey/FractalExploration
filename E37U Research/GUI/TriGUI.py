@@ -13,7 +13,7 @@ root.title('Plotting GUI')
 def getRSlider(): #Function that returns r from the slider
     return rSlider.get()
 
-def submitFunc(): #Funcion that updates the plots for a new r retreived from the slider
+def submitFunc(): #Function that updates the plots for a new r retrieved from the slider
     plotting(getRSlider())
 
 
@@ -38,13 +38,13 @@ def plotting(rIN):
 
     #Begin Iteration Plot Section
     numIterations = 100 #Number of discrete points in the plot, the resolution per say, TODO make a more accurate name
-    x0 = 0.99
+    x0 = 0.8
     points = [x0] #creates the list that will hold all the points and initializes the list ith the initial point which is required for a iterative equation
     intervalList = [0]
     interval = 1/numIterations
     for i in range(1,numIterations):#makes a big list of intervals between 0 and 1 spaced one "interval" apart
         intervalList.append(i*interval)
-    for i in range(1,numIterations): #Creates the list of all the iterations by refrencing the previous entry in the list
+    for i in range(1,numIterations): #Creates the list of all the iterations by referencing the previous entry in the list
         points.append((r * points[i-1]) * (1- points[i-1]))
     for i in range(0, numIterations): #for testing, shows all the points that will be passed to the graph and their iterator starting with x0
         print(i, points[i])
@@ -58,7 +58,7 @@ def plotting(rIN):
 
     #Begin Cobweb Plot Section
     cobwebIterations = 100 #number of individual cob web lines to be drawn
-    startX = .99 #Input the starting x point here
+    startX = x0 #Input the starting x point here
     plt.subplot(122)
     plt.plot([0,1],[0,1]) #plot y=x line (TODO make to fill the maximum bounds of the other plots not just 0-1)
     xs = np.arange(0,1,.001) #x for parab plot
@@ -68,7 +68,7 @@ def plotting(rIN):
     tempY = r * tempX * (-1*tempX + 1)
     plt.plot([tempX, tempX], [0, tempY]) #first lines 
     plt.plot([tempY, tempX], [tempY, tempY])#second line
-    for i in range(cobwebIterations):#loop that makes the resst of the cobweb lines
+    for i in range(cobwebIterations):#loop that makes the reset of the cobweb lines
         tempY = r * tempX * (-1*tempX + 1)
         plt.plot([tempX, tempX], [tempX, tempY])
         plt.plot([tempY, tempX], [tempY, tempY])
