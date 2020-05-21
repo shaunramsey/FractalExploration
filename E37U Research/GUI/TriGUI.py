@@ -19,6 +19,11 @@ cobwebStrands = 100 #Number of individual cob web lines to be drawn
 root = tkinter.Tk()
 root.title('Plotting GUI')
 #root.geometry("2000x1125")
+def on_closing():
+    root.quit()
+    root.destroy()
+
+root.protocol("WM_DELETE_WINDOW", on_closing)
 
 
 ##Begin Slider Section
@@ -26,7 +31,7 @@ root.title('Plotting GUI')
 def submitSlider(var): #Note: "var" is needed to overcome an anomaly with scale commands
     plotting(getRSlider(), getx0Slider(), figureDPI, numIterations, cobwebStrands)
 
-##Begin r Slider Section
+##Begin r Slider Section  
 
 def getRSlider(): #Function that returns r from the slider
     return rSlider.get()
@@ -127,4 +132,4 @@ def plotting(r,x0, figureDPI, numIterations, cobwebStrands):
 
 submitSlider(0) #First plot which is a placeholder until the r slider is used to select the desired r
 
-tkinter.mainloop()
+root.mainloop()
