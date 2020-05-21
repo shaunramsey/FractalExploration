@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-#r = 3.74 # 5 cylce
+#r = 3.74 # 5 cycLe
 #r = 3.9 # 3 cycle
 #r = 3.3 # 2 cycle
 #r = 2  #everything goes to 1/2
