@@ -132,4 +132,4 @@ def plotting(r,x0, figureDPI, numIterations, cobwebStrands):
 
 submitSlider(0) #First plot which is a placeholder until the r slider is used to select the desired r
 
-root.mainloop()
+tkinter.mainloop()
