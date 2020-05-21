@@ -8,7 +8,11 @@ root = tkinter.Tk()
 root.title('Plotting GUI')
 #root.geometry("2000x1125")
 
-    
+def on_closing():
+    root.quit()
+    root.destroy()
+
+root.protocol("WM_DELETE_WINDOW", on_closing)  
 
 def getRSlider(): #Function that returns r from the slider
     return rSlider.get()
@@ -85,4 +89,4 @@ def plotting(rIN):
 
 plotting(0) #First plot which is a placeholder until the r slider is used to select the desired r
 
-tkinter.mainloop()
+root.mainloop()
