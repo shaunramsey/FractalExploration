@@ -2,7 +2,10 @@ import tkinter
 from tkinter import *
 import numpy as np
 import matplotlib.pyplot as plt
+import tkinter.font as tkFont
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+
 
 ##Begin Default Values
 
@@ -12,6 +15,7 @@ sliderPrecision = .1 #Universal Slider Precision's default value on program star
 figureDPI = 100 #DPI value for main figure
 numIterations = 100 #Number of iterations in the iteration plot
 cobwebStrands = 100 #Number of individual cob web lines to be drawn
+fontSizeDefault = 20 #Default font size
 
 ##End Default Values
 
@@ -25,6 +29,12 @@ def on_closing():
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
+##Begin Font Section
+
+fontStyle = tkFont.Font(family="Times New Roman", size=fontSizeDefault)
+
+##End Font Section
+
 
 ##Begin Slider Section
 
@@ -37,11 +47,11 @@ def getRSlider(): #Function that returns r from the slider
     return rSlider.get()
 
 ## This is for if you want to auto update r with the slider but its very slow (Begin)
-rSlider = Scale(root, from_=0, to=4, orient=HORIZONTAL, resolution=sliderPrecision, label="R Value", command=submitSlider)
+rSlider = Scale(root, from_=0, to=4, orient=HORIZONTAL, resolution=sliderPrecision, label="R Value", command=submitSlider, font=fontStyle)
 ## This is for if you want to auto update r with the slider but its very slow (End)
 
 ## This is for if you want submit based r slider, faster but not as cool (Begin)
-#rSlider = Scale(root, from_=0, to=4, orient=HORIZONTAL, resolution=sliderPrecision, label="R Value")
+#rSlider = Scale(root, from_=0, to=4, orient=HORIZONTAL, resolution=sliderPrecision, label="R Value", font=fontStyle)
 #submitButton = Button(root, text="Submit", command=submitSlider)
 #submitButton.grid(row=1, column=1)
 ## This is for if you want submit based r slider, faster but not as cool (End)
@@ -56,7 +66,7 @@ rSlider.grid(row=1, column=0)
 def getx0Slider(): #Function that returns x0 from the slider
     return x0Slider.get()
 
-x0Slider = Scale(root, from_=0, to=1, orient=HORIZONTAL, resolution=sliderPrecision, label="Initial X Value", command=submitSlider)
+x0Slider = Scale(root, from_=0, to=1, orient=HORIZONTAL, resolution=sliderPrecision, label="Initial X Value", command=submitSlider, font=fontStyle)
 x0Slider.set(x0SliderDefault)
 x0Slider.grid(row=1, column=1)
 
@@ -64,7 +74,7 @@ x0Slider.grid(row=1, column=1)
 
 ##Begin Slider Precision Slider Section
 
-def setSliderPrecision():
+def setSliderPrecision(var):
     if sliderPrecisionSlider.get() == 1:
         sliderPrecision = 1 #TODO fix scope issue
         
@@ -72,12 +82,29 @@ def setSliderPrecision():
         tempPrecision = "."
         for i in range((sliderPrecisionSlider.get()-2)):
             tempPrecision = tempPrecision + "0"
-        sliderPrecision = float(tempPrecision + "1") #TODO fix scope issue 
+        sliderPrecision = float(tempPrecision + "1") #TODO fix scope issue
+    rSlider.configure(resolution=sliderPrecision)
+    x0Slider.configure(resolution=sliderPrecision)
 
-sliderPrecisionSlider = Scale(root, from_=1, to=10, label="Slider Precision", command=setSliderPrecision)
+sliderPrecisionSlider = Scale(root, from_=1, to=10, orient=HORIZONTAL, label="Slider Precision", command=setSliderPrecision, font=fontStyle)
 sliderPrecisionSlider.grid(row=1, column=2)
 
 ##End Slider Precision Slider Section
+
+##Begin Font Slider Section
+
+def setFontSize(var):
+    fontStyle.configure(size=fontSlider.get())
+    rSlider.configure(font=fontStyle)
+    x0Slider.configure(font=fontStyle)
+    fontSlider.configure(font=fontStyle)
+    sliderPrecisionSlider.configure(font=fontStyle)
+
+fontSlider = Scale(root, from_=1, to=30, orient=HORIZONTAL, label="Font Size", command=setFontSize, font=fontStyle)
+fontSlider.set(fontSizeDefault)
+fontSlider.grid(row=2, column=0)
+
+##End Font Slider Selection
 
 
 ##End Slider Section
@@ -129,6 +156,7 @@ def plotting(r,x0, figureDPI, numIterations, cobwebStrands):
     canvas = FigureCanvasTkAgg(fig1, master=root)
     canvas.draw()
     canvas.get_tk_widget().grid(row=0, column=0)
+    print("SliderPre: " + str(sliderPrecision))
 
 submitSlider(0) #First plot which is a placeholder until the r slider is used to select the desired r
 
