@@ -40,19 +40,20 @@ fontStyle = tkFont.Font(family="Times New Roman", size=fontSizeDefault)
 
 def submitSlider(var): #Note: "var" is needed to overcome an anomaly with scale commands
     plotting(getRSlider(), getx0Slider(), figureDPI, numIterations, cobwebStrands)
-    x0_label_var.set(x0Slider.get())
-    r_label_var.set(rSlider.get())
+    x0_sizelabel_var.set(x0Slider.get())
+    r_sizelabel_var.set(rSlider.get())
 
 ##Begin r Slider Section  
 
 def getRSlider(): #Function that returns r from the slider
     return rSlider.get()
 
-r_label_var = DoubleVar()
+r_sizelabel_var = DoubleVar()
+r_value_var = StringVar()#TODO Integrate
 r_frame = Frame(root)
 rSlider_label = Label(r_frame,text="R", font=fontStyle)
 rSlider_label.pack()
-rSlider_sizelabel = Label(r_frame, textvariable=r_label_var, font=fontStyle)
+rSlider_sizelabel = Label(r_frame, textvariable=r_sizelabel_var, font=fontStyle)
 rSlider_sizelabel.pack()
 rSlider = Scale(r_frame, from_=0, to=4,orient=HORIZONTAL, command=submitSlider, font=fontStyle, showvalue=0, length=200, resolution=sliderPrecision)
 rSlider.set(rSliderDefault)
@@ -66,11 +67,11 @@ r_frame.grid(row=1, column=0)
 def getx0Slider(): #Function that returns x0 from the slider
     return x0Slider.get()
 
-x0_label_var = DoubleVar()
+x0_sizelabel_var = DoubleVar()
 x0_frame = Frame(root)
 x0Slider_label = Label(x0_frame,text="Initial X Value", font=fontStyle)
 x0Slider_label.pack()
-x0Slider_sizelabel = Label(x0_frame, textvariable=x0_label_var, font=fontStyle)
+x0Slider_sizelabel = Label(x0_frame, textvariable=x0_sizelabel_var, font=fontStyle)
 x0Slider_sizelabel.pack()
 x0Slider = Scale(x0_frame, from_=0, to=1,orient=HORIZONTAL, command=submitSlider, font=fontStyle, showvalue=0, length=200, resolution=sliderPrecision)
 x0Slider.set(x0SliderDefault)
@@ -93,14 +94,14 @@ def setSliderPrecision(var):
         sliderPrecision = float(tempPrecision + "1") #TODO fix scope issue
     rSlider.configure(resolution=sliderPrecision)
     x0Slider.configure(resolution=sliderPrecision)
-    sliderPrecision_label_var.set(sliderPrecisionSlider.get())
+    sliderPrecision_sizelabel_var.set(sliderPrecisionSlider.get())
 
 
-sliderPrecision_label_var = IntVar()
+sliderPrecision_sizelabel_var = IntVar()
 sliderPrecision_frame = Frame(root)
 sliderPrecisionSlider_label = Label(sliderPrecision_frame,text="Slider Precision", font=fontStyle)
 sliderPrecisionSlider_label.pack()
-sliderPrecisionSlider_sizelabel = Label(sliderPrecision_frame, textvariable=sliderPrecision_label_var, font=fontStyle)
+sliderPrecisionSlider_sizelabel = Label(sliderPrecision_frame, textvariable=sliderPrecision_sizelabel_var, font=fontStyle)
 sliderPrecisionSlider_sizelabel.pack()
 sliderPrecisionSlider = Scale(sliderPrecision_frame, from_=1, to=10,orient=HORIZONTAL, command=setSliderPrecision, font=fontStyle, showvalue=0, length=200)
 sliderPrecisionSlider.set(2)
@@ -118,14 +119,14 @@ def setFontSize(var):
     x0Slider.configure(font=fontStyle)
     fontSlider.configure(font=fontStyle)
     sliderPrecisionSlider.configure(font=fontStyle)
-    fontsize_label_var.set(fontSlider.get())
+    fontsize_sizelabel_var.set(fontSlider.get())
 
 
-fontsize_label_var = IntVar()
+fontsize_sizelabel_var = IntVar()
 fontsize_frame = Frame(root)
 fontSlider_label = Label(fontsize_frame,text="Font Size", font=fontStyle)
 fontSlider_label.pack()
-fontSlider_sizelabel = Label(fontsize_frame, textvariable=fontsize_label_var, font=fontStyle)
+fontSlider_sizelabel = Label(fontsize_frame, textvariable=fontsize_sizelabel_var, font=fontStyle)
 fontSlider_sizelabel.pack()
 fontSlider = Scale(fontsize_frame, from_=1, to=30,orient=HORIZONTAL, command=setFontSize, font=fontStyle, showvalue=0, length=200)
 fontSlider.set(fontSizeDefault)
