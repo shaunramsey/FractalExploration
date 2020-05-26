@@ -40,24 +40,24 @@ fontStyle = tkFont.Font(family="Times New Roman", size=fontSizeDefault)
 
 def submitSlider(var): #Note: "var" is needed to overcome an anomaly with scale commands
     plotting(getRSlider(), getx0Slider(), figureDPI, numIterations, cobwebStrands)
+    x0_label_var.set(x0Slider.get())
+    r_label_var.set(rSlider.get())
 
 ##Begin r Slider Section  
 
 def getRSlider(): #Function that returns r from the slider
     return rSlider.get()
 
-## This is for if you want to auto update r with the slider but its very slow (Begin)
-rSlider = Scale(root, from_=0, to=4, orient=HORIZONTAL, resolution=sliderPrecision, label="R Value", command=submitSlider, font=fontStyle)
-## This is for if you want to auto update r with the slider but its very slow (End)
-
-## This is for if you want submit based r slider, faster but not as cool (Begin)
-#rSlider = Scale(root, from_=0, to=4, orient=HORIZONTAL, resolution=sliderPrecision, label="R Value", font=fontStyle)
-#submitButton = Button(root, text="Submit", command=submitSlider)
-#submitButton.grid(row=1, column=1)
-## This is for if you want submit based r slider, faster but not as cool (End)
-
+r_label_var = DoubleVar()
+r_frame = Frame(root)
+rSlider_label = Label(r_frame,text="R", font=fontStyle)
+rSlider_label.pack()
+rSlider_sizelabel = Label(r_frame, textvariable=r_label_var, font=fontStyle)
+rSlider_sizelabel.pack()
+rSlider = Scale(r_frame, from_=0, to=4,orient=HORIZONTAL, command=submitSlider, font=fontStyle, showvalue=0, length=200, resolution=sliderPrecision)
 rSlider.set(rSliderDefault)
-rSlider.grid(row=1, column=0)
+rSlider.pack()
+r_frame.grid(row=1, column=0)
 
 ##End r Slider Section
 
@@ -66,9 +66,17 @@ rSlider.grid(row=1, column=0)
 def getx0Slider(): #Function that returns x0 from the slider
     return x0Slider.get()
 
-x0Slider = Scale(root, from_=0, to=1, orient=HORIZONTAL, resolution=sliderPrecision, label="Initial X Value", command=submitSlider, font=fontStyle)
+x0_label_var = DoubleVar()
+x0_frame = Frame(root)
+x0Slider_label = Label(x0_frame,text="Initial X Value", font=fontStyle)
+x0Slider_label.pack()
+x0Slider_sizelabel = Label(x0_frame, textvariable=x0_label_var, font=fontStyle)
+x0Slider_sizelabel.pack()
+x0Slider = Scale(x0_frame, from_=0, to=1,orient=HORIZONTAL, command=submitSlider, font=fontStyle, showvalue=0, length=200, resolution=sliderPrecision)
 x0Slider.set(x0SliderDefault)
-x0Slider.grid(row=1, column=1)
+x0Slider.pack()
+x0_frame.grid(row=1, column=1)
+
 
 ##End x0 Slider Section
 
@@ -85,9 +93,20 @@ def setSliderPrecision(var):
         sliderPrecision = float(tempPrecision + "1") #TODO fix scope issue
     rSlider.configure(resolution=sliderPrecision)
     x0Slider.configure(resolution=sliderPrecision)
+    sliderPrecision_label_var.set(sliderPrecisionSlider.get())
 
-sliderPrecisionSlider = Scale(root, from_=1, to=10, orient=HORIZONTAL, label="Slider Precision", command=setSliderPrecision, font=fontStyle)
-sliderPrecisionSlider.grid(row=1, column=2)
+
+sliderPrecision_label_var = IntVar()
+sliderPrecision_frame = Frame(root)
+sliderPrecisionSlider_label = Label(sliderPrecision_frame,text="Slider Precision", font=fontStyle)
+sliderPrecisionSlider_label.pack()
+sliderPrecisionSlider_sizelabel = Label(sliderPrecision_frame, textvariable=sliderPrecision_label_var, font=fontStyle)
+sliderPrecisionSlider_sizelabel.pack()
+sliderPrecisionSlider = Scale(sliderPrecision_frame, from_=1, to=10,orient=HORIZONTAL, command=setSliderPrecision, font=fontStyle, showvalue=0, length=200)
+sliderPrecisionSlider.set(2)
+sliderPrecisionSlider.pack()
+sliderPrecision_frame.grid(row=1, column=2)
+
 
 ##End Slider Precision Slider Section
 
@@ -99,10 +118,19 @@ def setFontSize(var):
     x0Slider.configure(font=fontStyle)
     fontSlider.configure(font=fontStyle)
     sliderPrecisionSlider.configure(font=fontStyle)
+    fontsize_label_var.set(fontSlider.get())
 
-fontSlider = Scale(root, from_=1, to=30, orient=HORIZONTAL, label="Font Size", command=setFontSize, font=fontStyle)
+
+fontsize_label_var = IntVar()
+fontsize_frame = Frame(root)
+fontSlider_label = Label(fontsize_frame,text="Font Size", font=fontStyle)
+fontSlider_label.pack()
+fontSlider_sizelabel = Label(fontsize_frame, textvariable=fontsize_label_var, font=fontStyle)
+fontSlider_sizelabel.pack()
+fontSlider = Scale(fontsize_frame, from_=1, to=30,orient=HORIZONTAL, command=setFontSize, font=fontStyle, showvalue=0, length=200)
 fontSlider.set(fontSizeDefault)
-fontSlider.grid(row=2, column=0)
+fontSlider.pack()
+fontsize_frame.grid(row=2, column=0)
 
 ##End Font Slider Selection
 
@@ -155,9 +183,9 @@ def plotting(r,x0, figureDPI, numIterations, cobwebStrands):
     plt.subplots_adjust(hspace=.5)#Specifies the space between plots
     canvas = FigureCanvasTkAgg(fig1, master=root)
     canvas.draw()
-    canvas.get_tk_widget().grid(row=0, column=0)
+    canvas.get_tk_widget().grid(columnspan=3, row=0, column=0)
     print("SliderPre: " + str(sliderPrecision))
 
 submitSlider(0) #First plot which is a placeholder until the r slider is used to select the desired r
 
-tkinter.mainloop()
+root.mainloop()
