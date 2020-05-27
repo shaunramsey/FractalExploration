@@ -6,7 +6,6 @@ import tkinter.font as tkFont
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import time
 import matplotlib.animation as animation
-import threading
 
 
 
@@ -38,36 +37,17 @@ fontStyle = tkFont.Font(family="Times New Roman", size=fontSizeDefault)
 
 ##End Font Section
 
-##Begin EXPEREMENTAL Trace Section (1/2)
+##Begin Universal Variables Section
 
 rCallVar = DoubleVar()
 x0CallVar = DoubleVar()
 precisionCallVar = IntVar()
 fontSizeCallVar = IntVar()
 
-##End EXPEREMENTAL Trace Section (1/2)
+##End Universal Variables Section
 
 
 ##Begin Slider Section
-#
-#def submitSlider(var): #Note: "var" is needed to overcome an anomaly with scale commands
-#    plotting(getRSlider(), getx0Slider(), figureDPI, numIterations, cobwebStrands)
-#    x0_sizelabel_var.set(x0Slider.get())
-#    r_sizelabel_var.set(rSlider.get())
-#    rSliderValue_var.set(rSlider.get())
-#
-##Begin r Slider Section  
-#
-#def getRSlider(): #Function that returns r from the slider
-#    return rSlider.get()
-
-#def rEntryPause(input): #attempts to use validate to force the entry to use the most recent version of an entry (1/2)
-#    time.sleep(1)
-#    if input == rEntry.get():
-#        return TRUE
-#    else:
-#        FALSE
-
 
 r_sizelabel_var = DoubleVar()
 r_frame = Frame(root)
@@ -99,7 +79,6 @@ x0Entry.pack()
 #x0Slider_sizelabel = Label(x0_frame, textvariable=x0_sizelabel_var, font=fontStyle)
 #x0Slider_sizelabel.pack()
 x0Slider = Scale(x0_frame, from_=0, to=1,orient=HORIZONTAL, variable=x0CallVar, font=fontStyle, showvalue=0, length=200, resolution=sliderPrecision)
-#x0Slider.set(x0SliderDefault)
 x0CallVar.set(x0SliderDefault)
 x0Slider.pack()
 x0_frame.grid(row=1, column=4)
@@ -195,27 +174,5 @@ canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, rowspan=4)
 
 ani = animation.FuncAnimation(fig, plotting, interval=1000)
-
-
-##Begin Experemental Trace Section (2/2)
-
-#def valueChange(var, indx, mode):#function to handle a change in one of the GUI inputs
-#    if rCallVar.get() != rSlider.get():
-#        rSlider.set(rCallVar.get())
-#    if x0CallVar.get() != x0Slider.get():
-#        x0Slider.set(x0CallVar.get())
-#    #sliderPrecisionSlider.set(precisionCallVar.get())
-#    #fontSlider.set(fontSizeCallVar.get())
-#    time.sleep(1)
-#    plotting(rCallVar.get(), x0CallVar.get(), figureDPI, numIterations, cobwebStrands)
- 
-#rCallVar.trace_add("write", valueChange)
-#x0CallVar.trace_add("write", valueChange)
-
-##End Experemental Trace Section (2/2)
-
-#submitSlider(0) #First plot which is a placeholder until the r slider is used to select the desired r
-#valueChange()
-#plotting(rCallVar.get(), x0CallVar.get(), figureDPI, numIterations, cobwebStrands)
 
 root.mainloop()
