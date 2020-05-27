@@ -6,6 +6,7 @@ import tkinter.font as tkFont
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import time
 import matplotlib.animation as animation
+import threading
 
 
 
@@ -80,7 +81,7 @@ rEntry.pack()
 rSlider = Scale(r_frame, from_=0, to=4,orient=HORIZONTAL, variable=rCallVar, font=fontStyle, showvalue=0, length=200, resolution=sliderPrecision)
 rCallVar.set(rSliderDefault)
 rSlider.pack()
-r_frame.grid(row=1, column=0)
+r_frame.grid(row=0, column=4)
 
 ##End r Slider Section
 
@@ -101,7 +102,7 @@ x0Slider = Scale(x0_frame, from_=0, to=1,orient=HORIZONTAL, variable=x0CallVar, 
 #x0Slider.set(x0SliderDefault)
 x0CallVar.set(x0SliderDefault)
 x0Slider.pack()
-x0_frame.grid(row=1, column=1)
+x0_frame.grid(row=1, column=4)
 
 
 ##End x0 Slider Section
@@ -131,7 +132,7 @@ sliderPrecisionSlider_sizelabel.pack()
 sliderPrecisionSlider = Scale(sliderPrecision_frame, from_=1, to=10,orient=HORIZONTAL, command=setSliderPrecision, font=fontStyle, showvalue=0, length=200)
 sliderPrecisionSlider.set(2)
 sliderPrecisionSlider.pack()
-sliderPrecision_frame.grid(row=1, column=2)
+sliderPrecision_frame.grid(row=2, column=4)
 
 
 ##End Slider Precision Slider Section
@@ -156,7 +157,7 @@ fontSlider_sizelabel.pack()
 fontSlider = Scale(fontsize_frame, from_=1, to=30,orient=HORIZONTAL, command=setFontSize, font=fontStyle, showvalue=0, length=200)
 fontSlider.set(fontSizeDefault)
 fontSlider.pack()
-fontsize_frame.grid(row=2, column=0)
+fontsize_frame.grid(row=3, column=4)
 
 ##End Font Slider Selection
 
@@ -191,11 +192,9 @@ def plotting(i):
     plt.ylabel("X_n+1 Values")
     #End Cobweb Plot Section
 canvas = FigureCanvasTkAgg(fig, master=root)
-canvas.get_tk_widget().grid(row=0, column=0)
+canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, rowspan=4)
 
 ani = animation.FuncAnimation(fig, plotting, interval=1000)
-#canvas = FigureCanvasTkAgg(ani, master=root)
-#canvas.get_tk_widget().grid(columnspan=3, row=0, column=0)
 
 
 ##Begin Experemental Trace Section (2/2)
