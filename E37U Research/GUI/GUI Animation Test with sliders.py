@@ -168,7 +168,7 @@ ax1 = fig.add_subplot(111)
 
 def plotting(i):
     #print("r: " + str(r)) #NOTE for Testing
-    canvas.clear()
+    ax1.clear()
     r= rCallVar.get()
     x0 = x0CallVar.get()
 
@@ -190,15 +190,12 @@ def plotting(i):
     plt.xlabel("X_n Values")
     plt.ylabel("X_n+1 Values")
     #End Cobweb Plot Section
-#canvas = FigureCanvasTkAgg(fig, master=root)
-#canvas.draw()
-#canvas.get_tk_widget().grid(columnspan=3, row=0, column=0)
+canvas = FigureCanvasTkAgg(fig, master=root)
+canvas.get_tk_widget().grid(row=0, column=0)
 
 ani = animation.FuncAnimation(fig, plotting, interval=1000)
-plt.show()
 #canvas = FigureCanvasTkAgg(ani, master=root)
 #canvas.get_tk_widget().grid(columnspan=3, row=0, column=0)
-#canvas.draw()
 
 
 ##Begin Experemental Trace Section (2/2)
