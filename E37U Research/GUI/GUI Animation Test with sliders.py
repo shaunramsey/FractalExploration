@@ -61,7 +61,7 @@ rEntry.pack()
 rSlider = Scale(r_frame, from_=0, to=4,orient=HORIZONTAL, variable=rCallVar, font=fontStyle, showvalue=0, length=200, resolution=sliderPrecision)
 rCallVar.set(rSliderDefault)
 rSlider.pack()
-r_frame.grid(row=0, column=4)
+r_frame.grid(row=4, column=0)
 
 ##End r Slider Section
 
@@ -81,7 +81,7 @@ x0Entry.pack()
 x0Slider = Scale(x0_frame, from_=0, to=1,orient=HORIZONTAL, variable=x0CallVar, font=fontStyle, showvalue=0, length=200, resolution=sliderPrecision)
 x0CallVar.set(x0SliderDefault)
 x0Slider.pack()
-x0_frame.grid(row=1, column=4)
+x0_frame.grid(row=4, column=1)
 
 
 ##End x0 Slider Section
@@ -111,7 +111,7 @@ sliderPrecisionSlider_sizelabel.pack()
 sliderPrecisionSlider = Scale(sliderPrecision_frame, from_=1, to=10,orient=HORIZONTAL, command=setSliderPrecision, font=fontStyle, showvalue=0, length=200)
 sliderPrecisionSlider.set(2)
 sliderPrecisionSlider.pack()
-sliderPrecision_frame.grid(row=2, column=4)
+sliderPrecision_frame.grid(row=4, column=2)
 
 
 ##End Slider Precision Slider Section
@@ -136,7 +136,7 @@ fontSlider_sizelabel.pack()
 fontSlider = Scale(fontsize_frame, from_=1, to=30,orient=HORIZONTAL, command=setFontSize, font=fontStyle, showvalue=0, length=200)
 fontSlider.set(fontSizeDefault)
 fontSlider.pack()
-fontsize_frame.grid(row=3, column=4)
+fontsize_frame.grid(row=4, column=3)
 
 ##End Font Slider Selection
 
@@ -144,11 +144,15 @@ fontsize_frame.grid(row=3, column=4)
 ##End Slider Section
 
 fig = plt.figure()
-ax1 = fig.add_subplot(111)
+ax1 = fig.add_subplot(122)
+ax2 = fig.add_subplot(121)
+plt.subplots_adjust(wspace=.5)#Specifies the space between plots
+fig.set_size_inches(10, 4)
 
 def plotting(i):
     #print("r: " + str(r)) #NOTE for Testing
     ax1.clear()
+    ax2.clear()
     r= rCallVar.get()
     x0 = x0CallVar.get()
 
@@ -157,19 +161,36 @@ def plotting(i):
     xs = np.arange(0,1,.001) #x for parabala plot
     ys =(r * xs * (1-xs)) #y for parabala plot
     ax1.plot(xs, ys) #parabala plot
-    tempX = x0
-    tempY = r * tempX * (-1*tempX + 1)
-    ax1.plot([tempX, tempX], [0, tempY]) #first lines 
-    ax1.plot([tempY, tempX], [tempY, tempY])#second line
+    a = x0
+    c = r * a * (-1*a + 1)
+    ax1.plot([x0, x0], [0, c]) #first lines 
+    ax1.plot([x0, c], [c, c])#second line
     for i in range(cobwebStrands):#loop that makes the rest of the cobweb lines
-        tempY = r * tempX * (-1*tempX + 1)
-        ax1.plot([tempX, tempX], [tempX, tempY])
-        ax1.plot([tempY, tempX], [tempY, tempY])
-        tempX=tempY
+        a = c
+        c = r * a * (-1*a + 1)
+        ax1.plot([a, a], [a, c])
+        ax1.plot([a, c], [c, c])
     plt.title("Cobweb Plot")
     plt.xlabel("X_n Values")
     plt.ylabel("X_n+1 Values")
     #End Cobweb Plot Section
+
+    #Begin Iteration Plot Section
+    points = [x0] #creates the list that will hold all the points and initializes the list ith the initial point which is required for a iterative equation
+    intervalList = [0]
+    interval = 1/numIterations
+    for i in range(1,numIterations):#makes a big list of intervals between 0 and 1 spaced one "interval" apart
+        intervalList.append(i*interval)
+    for i in range(1,numIterations): #Creates the list of all the iterations by referencing the previous entry in the list
+        points.append((r * points[i-1]) * (1- points[i-1]))
+    #for i in range(0, numIterations): #NOTE for testing, shows all the points that will be passed to the graph and their iterator starting with x0
+    #    print(i, points[i])
+    x = intervalList
+    ax2.plot(x, points)
+    plt.title("Iterations Plot")
+    plt.xlabel("Iterations")
+    plt.ylabel("X Values")
+    #End Iteration Plot Section
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, rowspan=4)
 
