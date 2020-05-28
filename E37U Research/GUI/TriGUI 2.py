@@ -141,12 +141,15 @@ fontsize_frame.grid(row=4, column=3)
 ##End Font Slider Selection
 
 
+
+
+
 ##End Slider Section
 
 fig = plt.figure()
 ax1 = fig.add_subplot(122)
 ax2 = fig.add_subplot(121)
-plt.subplots_adjust(wspace=.5)#Specifies the space between plots
+plt.subplots_adjust(wspace=.5, hspace=.5)#Specifies the space between plots
 fig.set_size_inches(10, 4)
 
 def plotting(i):
@@ -157,22 +160,22 @@ def plotting(i):
     x0 = x0CallVar.get()
 
     #Begin Cobweb Plot Section
-    ax1.plot([0,1],[0,1]) #plot y=x line (TODO make to fill the maximum bounds of the other plots not just 0-1)
+    ax1.plot([0,1],[0,1], linewidth=.7) #plot y=x line (TODO make to fill the maximum bounds of the other plots not just 0-1)
     xs = np.arange(0,1,.001) #x for parabala plot
     ys =(r * xs * (1-xs)) #y for parabala plot
-    ax1.plot(xs, ys) #parabala plot
+    ax1.plot(xs, ys, linewidth=.7) #parabala plot
     a = x0
     c = r * a * (-1*a + 1)
-    ax1.plot([x0, x0], [0, c]) #first lines 
-    ax1.plot([x0, c], [c, c])#second line
+    ax1.plot([x0, x0], [0, c], linewidth=.5) #first lines 
+    ax1.plot([x0, c], [c, c], linewidth=.5)#second line
     for i in range(cobwebStrands):#loop that makes the rest of the cobweb lines
         a = c
         c = r * a * (-1*a + 1)
-        ax1.plot([a, a], [a, c])
-        ax1.plot([a, c], [c, c])
-    plt.title("Cobweb Plot")
-    plt.xlabel("X_n Values")
-    plt.ylabel("X_n+1 Values")
+        ax1.plot([a, a], [a, c], linewidth=.5)
+        ax1.plot([a, c], [c, c], linewidth=.5)
+    ax1.set_title("Cobweb Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
+    ax1.set_xlabel("X_n Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
+    ax1.set_ylabel("X_n+1 Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
     #End Cobweb Plot Section
 
     #Begin Iteration Plot Section
@@ -186,10 +189,10 @@ def plotting(i):
     #for i in range(0, numIterations): #NOTE for testing, shows all the points that will be passed to the graph and their iterator starting with x0
     #    print(i, points[i])
     x = intervalList
-    ax2.plot(x, points)
-    plt.title("Iterations Plot")
-    plt.xlabel("Iterations")
-    plt.ylabel("X Values")
+    ax2.plot(x, points, linewidth=.7)
+    ax2.set_title("Iterations Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
+    ax2.set_xlabel("Iterations", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
+    ax2.set_ylabel("X Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
     #End Iteration Plot Section
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, rowspan=4)
