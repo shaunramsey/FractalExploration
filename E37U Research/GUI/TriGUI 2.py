@@ -6,6 +6,7 @@ import tkinter.font as tkFont
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import time
 import matplotlib.animation as animation
+import math
 
 
 
@@ -94,7 +95,7 @@ def setSliderPrecision(var):
         
     else:
         tempPrecision = "."
-        for i in range((sliderPrecisionSlider.get()-2)):
+        for _ in range((sliderPrecisionSlider.get()-2)):
             tempPrecision = tempPrecision + "0"
         sliderPrecision = float(tempPrecision + "1") #TODO fix scope issue
     rSlider.configure(resolution=sliderPrecision)
@@ -139,10 +140,6 @@ fontSlider.pack()
 fontsize_frame.grid(row=4, column=3)
 
 ##End Font Slider Selection
-
-
-
-
 
 ##End Slider Section
 
@@ -194,9 +191,43 @@ def plotting(i):
     ax2.set_xlabel("Iterations", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
     ax2.set_ylabel("X Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
     #End Iteration Plot Section
+    lamCallVar.set(calcLam())
+    print("r: " + str(r) + " Lam: " + calcLam())
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, rowspan=4)
 
 ani = animation.FuncAnimation(fig, plotting, interval=1000)
+
+##Begin lyapunov Section
+
+def calcLam():
+    tempx = x0CallVar.get()
+    r = rCallVar.get()
+    sum = 0
+    n = 50
+    lam = 0
+    for _ in range(100):
+        tempx = r * tempx * (-1*tempx + 1)
+
+    for _ in range(n):
+        tempx = r * tempx * (-1*tempx + 1)
+        f=abs(r * (-2*tempx +1 ))
+        if f < 0.0000000001:
+            return "-∞"
+        else:
+            sum= sum + (math.log(f))
+    lam = sum / n
+    return str(lam)
+
+lamCallVar = DoubleVar()
+lamCallVar.set(calcLam())
+lamFrame = Frame(root)
+lamLabelTitle = Label(lamFrame, text="Lyapunov Exponent:", font=fontStyle)
+lamLabelTitle.pack()
+lamLabel = Label(lamFrame, textvariable=lamCallVar, font=fontStyle)
+lamLabel.pack()
+lamFrame.grid(row=5, column=0)
+
+#End lyapunov Section
 
 root.mainloop()

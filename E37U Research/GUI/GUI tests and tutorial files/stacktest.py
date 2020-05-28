@@ -21,12 +21,13 @@ root = Tk.Tk()
 
 
 def slide():
-    print("fuck! :)")
+    print("hi!! :)")
 
 my_btn = Button(root, text="Click Me!", command=slide)
 my_btn.grid(column=1, row=1)
 
-label = Tk.Label(root,text="SHM Simulation").grid(column=0, row=0)
+#label = Tk.Label(root,text="SHM Simulation").grid(column=0, row=0)
+#label.grid(column=1, row=1)
 
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().grid(column=0,row=1)
