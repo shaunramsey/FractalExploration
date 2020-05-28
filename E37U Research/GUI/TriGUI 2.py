@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import tkinter.font as tkFont
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import time
+import matplotlib.animation as animation
 
 
 
@@ -36,36 +37,17 @@ fontStyle = tkFont.Font(family="Times New Roman", size=fontSizeDefault)
 
 ##End Font Section
 
-##Begin EXPEREMENTAL Trace Section (1/2)
+##Begin Universal Variables Section
 
 rCallVar = DoubleVar()
 x0CallVar = DoubleVar()
 precisionCallVar = IntVar()
 fontSizeCallVar = IntVar()
 
-##End EXPEREMENTAL Trace Section (1/2)
+##End Universal Variables Section
 
 
 ##Begin Slider Section
-#
-#def submitSlider(var): #Note: "var" is needed to overcome an anomaly with scale commands
-#    plotting(getRSlider(), getx0Slider(), figureDPI, numIterations, cobwebStrands)
-#    x0_sizelabel_var.set(x0Slider.get())
-#    r_sizelabel_var.set(rSlider.get())
-#    rSliderValue_var.set(rSlider.get())
-#
-##Begin r Slider Section  
-#
-#def getRSlider(): #Function that returns r from the slider
-#    return rSlider.get()
-
-#def rEntryPause(input): #attempts to use validate to force the entry to use the most recent version of an entry (1/2)
-#    time.sleep(1)
-#    if input == rEntry.get():
-#        return TRUE
-#    else:
-#        FALSE
-
 
 r_sizelabel_var = DoubleVar()
 r_frame = Frame(root)
@@ -79,7 +61,7 @@ rEntry.pack()
 rSlider = Scale(r_frame, from_=0, to=4,orient=HORIZONTAL, variable=rCallVar, font=fontStyle, showvalue=0, length=200, resolution=sliderPrecision)
 rCallVar.set(rSliderDefault)
 rSlider.pack()
-r_frame.grid(row=1, column=0)
+r_frame.grid(row=4, column=0)
 
 ##End r Slider Section
 
@@ -97,10 +79,9 @@ x0Entry.pack()
 #x0Slider_sizelabel = Label(x0_frame, textvariable=x0_sizelabel_var, font=fontStyle)
 #x0Slider_sizelabel.pack()
 x0Slider = Scale(x0_frame, from_=0, to=1,orient=HORIZONTAL, variable=x0CallVar, font=fontStyle, showvalue=0, length=200, resolution=sliderPrecision)
-#x0Slider.set(x0SliderDefault)
 x0CallVar.set(x0SliderDefault)
 x0Slider.pack()
-x0_frame.grid(row=1, column=1)
+x0_frame.grid(row=4, column=1)
 
 
 ##End x0 Slider Section
@@ -130,7 +111,7 @@ sliderPrecisionSlider_sizelabel.pack()
 sliderPrecisionSlider = Scale(sliderPrecision_frame, from_=1, to=10,orient=HORIZONTAL, command=setSliderPrecision, font=fontStyle, showvalue=0, length=200)
 sliderPrecisionSlider.set(2)
 sliderPrecisionSlider.pack()
-sliderPrecision_frame.grid(row=1, column=2)
+sliderPrecision_frame.grid(row=4, column=2)
 
 
 ##End Slider Precision Slider Section
@@ -155,22 +136,47 @@ fontSlider_sizelabel.pack()
 fontSlider = Scale(fontsize_frame, from_=1, to=30,orient=HORIZONTAL, command=setFontSize, font=fontStyle, showvalue=0, length=200)
 fontSlider.set(fontSizeDefault)
 fontSlider.pack()
-fontsize_frame.grid(row=2, column=0)
+fontsize_frame.grid(row=4, column=3)
 
 ##End Font Slider Selection
 
 
+
+
+
 ##End Slider Section
 
-fig1 = plt.figure(dpi=figureDPI)
-fig1.set_size_inches(10, 4)
-canvas = FigureCanvasTkAgg(fig1, master=root)
-canvas.draw()
-canvas.get_tk_widget().grid(columnspan=3, row=0, column=0)
+fig = plt.figure()
+ax1 = fig.add_subplot(122)
+ax2 = fig.add_subplot(121)
+plt.subplots_adjust(wspace=.5, hspace=.5)#Specifies the space between plots
+fig.set_size_inches(10, 4)
 
-def plotting(r,x0, figureDPI, numIterations, cobwebStrands):
+def plotting(i):
     #print("r: " + str(r)) #NOTE for Testing
-    
+    ax1.clear()
+    ax2.clear()
+    r= rCallVar.get()
+    x0 = x0CallVar.get()
+
+    #Begin Cobweb Plot Section
+    ax1.plot([0,1],[0,1], linewidth=.7) #plot y=x line (TODO make to fill the maximum bounds of the other plots not just 0-1)
+    xs = np.arange(0,1,.001) #x for parabala plot
+    ys =(r * xs * (1-xs)) #y for parabala plot
+    ax1.plot(xs, ys, linewidth=.7) #parabala plot
+    a = x0
+    c = r * a * (-1*a + 1)
+    ax1.plot([x0, x0], [0, c], linewidth=.5) #first lines 
+    ax1.plot([x0, c], [c, c], linewidth=.5)#second line
+    for i in range(cobwebStrands):#loop that makes the rest of the cobweb lines
+        a = c
+        c = r * a * (-1*a + 1)
+        ax1.plot([a, a], [a, c], linewidth=.5)
+        ax1.plot([a, c], [c, c], linewidth=.5)
+    ax1.set_title("Cobweb Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
+    ax1.set_xlabel("X_n Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
+    ax1.set_ylabel("X_n+1 Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
+    #End Cobweb Plot Section
 
     #Begin Iteration Plot Section
     points = [x0] #creates the list that will hold all the points and initializes the list ith the initial point which is required for a iterative equation
@@ -180,60 +186,17 @@ def plotting(r,x0, figureDPI, numIterations, cobwebStrands):
         intervalList.append(i*interval)
     for i in range(1,numIterations): #Creates the list of all the iterations by referencing the previous entry in the list
         points.append((r * points[i-1]) * (1- points[i-1]))
-    for i in range(0, numIterations): #NOTE for testing, shows all the points that will be passed to the graph and their iterator starting with x0
-        print(i, points[i])
+    #for i in range(0, numIterations): #NOTE for testing, shows all the points that will be passed to the graph and their iterator starting with x0
+    #    print(i, points[i])
     x = intervalList
-    plt.subplot(121)
-    plt.title("Iterations Plot")
-    plt.xlabel("Iterations")
-    plt.ylabel("X Values")
-    plt.plot(x, points)
+    ax2.plot(x, points, linewidth=.7)
+    ax2.set_title("Iterations Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
+    ax2.set_xlabel("Iterations", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
+    ax2.set_ylabel("X Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
     #End Iteration Plot Section
+canvas = FigureCanvasTkAgg(fig, master=root)
+canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, rowspan=4)
 
-    #Begin Cobweb Plot Section
-    plt.subplot(122)
-    plt.plot([0,1],[0,1]) #plot y=x line (TODO make to fill the maximum bounds of the other plots not just 0-1)
-    xs = np.arange(0,1,.001) #x for parabala plot
-    ys =(r * xs * (1-xs)) #y for parabala plot
-    plt.plot(xs, ys) #parabala plot
-    tempX = x0
-    tempY = r * tempX * (-1*tempX + 1)
-    plt.plot([tempX, tempX], [0, tempY]) #first lines 
-    plt.plot([tempY, tempX], [tempY, tempY])#second line
-    for i in range(cobwebStrands):#loop that makes the rest of the cobweb lines
-        tempY = r * tempX * (-1*tempX + 1)
-        plt.plot([tempX, tempX], [tempX, tempY])
-        plt.plot([tempY, tempX], [tempY, tempY])
-        tempX=tempY
-    plt.title("Cobweb Plot")
-    plt.xlabel("X_n Values")
-    plt.ylabel("X_n+1 Values")
-    #End Cobweb Plot Section
-
-    plt.subplots_adjust(hspace=.5)#Specifies the space between plots
-    
-    #print("SliderPre: " + str(sliderPrecision))
-
-
-##Begin Experemental Trace Section (2/2)
-
-def valueChange(var, indx, mode):#function to handle a change in one of the GUI inputs
-    if rCallVar.get() != rSlider.get():
-        rSlider.set(rCallVar.get())
-    if x0CallVar.get() != x0Slider.get():
-        x0Slider.set(x0CallVar.get())
-    #sliderPrecisionSlider.set(precisionCallVar.get())
-    #fontSlider.set(fontSizeCallVar.get())
-    time.sleep(1)
-    plotting(rCallVar.get(), x0CallVar.get(), figureDPI, numIterations, cobwebStrands)
- 
-rCallVar.trace_add("write", valueChange)
-x0CallVar.trace_add("write", valueChange)
-
-##End Experemental Trace Section (2/2)
-
-#submitSlider(0) #First plot which is a placeholder until the r slider is used to select the desired r
-#valueChange()
-plotting(rCallVar.get(), x0CallVar.get(), figureDPI, numIterations, cobwebStrands)
+ani = animation.FuncAnimation(fig, plotting, interval=1000)
 
 root.mainloop()
