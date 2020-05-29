@@ -1,5 +1,5 @@
 import numpy as np
-import cupy as cp
+import cupy-cuda102 as cp
 import time
 
 ### Numpy and CPU

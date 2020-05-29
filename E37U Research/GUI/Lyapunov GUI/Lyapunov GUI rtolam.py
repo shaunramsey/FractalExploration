@@ -16,15 +16,13 @@ x0SliderDefault = .5 #Slider for Initial x's default value on program startup
 rSliderDefault = 3.3 #Slider for r's default value on program startup
 sliderPrecision = .1 #Universal Slider Precision's default value on program startup
 figureDPI = 50 #DPI value for main figure
-numIterations = 100 #Number of iterations in the iteration plot
-cobwebStrands = 100 #Number of individual cob web lines to be drawn
 fontSizeDefault = 20 #Default font size
 
 ##End Default Values
 
 
 root = tkinter.Tk()
-root.title('Plotting GUI')
+root.title('Lyapunov GUI')
 #root.geometry("2000x1125")
 def on_closing():
     root.quit()
@@ -41,6 +39,15 @@ fontStyle = tkFont.Font(family="Times New Roman", size=fontSizeDefault)
 ##Begin Universal Variables Section
 
 rCallVar = DoubleVar()
+precisionCallVar = IntVar()
+fontSizeCallVar = IntVar()
+
+##End Universal Variables Section
+
+
+##Begin Universal Variables Section
+
+rCallVar = DoubleVar()
 x0CallVar = DoubleVar()
 precisionCallVar = IntVar()
 fontSizeCallVar = IntVar()
@@ -52,7 +59,7 @@ fontSizeCallVar = IntVar()
 
 r_sizelabel_var = DoubleVar()
 r_frame = Frame(root)
-rSlider_label = Label(r_frame,text="R", font=fontStyle)
+rSlider_label = Label(r_frame,text="R_A", font=fontStyle)
 rSlider_label.pack()
 #rEntry = Entry(r_frame, textvariable=rCallVar, font=fontStyle, validate="focusout", validatecommand=rEntryPause(self.get())) #attempts to use validate to force the entry to use the most recent version of an entry (2/2)
 rEntry = Entry(r_frame, textvariable=rCallVar, font=fontStyle)
@@ -144,89 +151,79 @@ fontsize_frame.grid(row=4, column=3)
 ##End Slider Section
 
 fig = plt.figure()
-ax1 = fig.add_subplot(122)
-ax2 = fig.add_subplot(121)
-plt.subplots_adjust(wspace=.5, hspace=.5)#Specifies the space between plots
+ax1 = fig.add_subplot(111)
 fig.set_size_inches(10, 4)
 
+
 def plotting(i):
-    #print("r: " + str(r)) #NOTE for Testing
+    rBPrecision = 1000
+
     ax1.clear()
-    ax2.clear()
-    r= rCallVar.get()
-    x0 = x0CallVar.get()
+    rBList = np.linspace(2, 4, rBPrecision)
+    lamList= []
+    for i in range(len(rBList)):
+        #print(rBList[i])
+        temp = calcLam(rBList[i])
+        if temp < -.5:
+            lamList.append(-.5)
+        else:
+            lamList.append(temp)
+    ax1.plot(rBList,lamList, linewidth=.5)
+    ax1.plot([2,4], [0,0])
+    ax1.set_ybound(lower=-.6, upper=1)
+    ax1.set_title("R_B/Lambda Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
+    ax1.set_xlabel("R_B", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
+    ax1.set_ylabel("Lambda", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
 
-    #Begin Cobweb Plot Section
-    ax1.plot([0,1],[0,1], linewidth=.7) #plot y=x line (TODO make to fill the maximum bounds of the other plots not just 0-1)
-    xs = np.arange(0,1,.001) #x for parabala plot
-    ys =(r * xs * (1-xs)) #y for parabala plot
-    ax1.plot(xs, ys, linewidth=.7) #parabala plot
-    a = x0
-    c = r * a * (-1*a + 1)
-    ax1.plot([x0, x0], [0, c], linewidth=.5) #first lines 
-    ax1.plot([x0, c], [c, c], linewidth=.5)#second line
-    for i in range(cobwebStrands):#loop that makes the rest of the cobweb lines
-        a = c
-        c = r * a * (-1*a + 1)
-        ax1.plot([a, a], [a, c], linewidth=.5)
-        ax1.plot([a, c], [c, c], linewidth=.5)
-    ax1.set_title("Cobweb Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
-    ax1.set_xlabel("X_n Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
-    ax1.set_ylabel("X_n+1 Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
-    #End Cobweb Plot Section
-
-    #Begin Iteration Plot Section
-    points = [x0] #creates the list that will hold all the points and initializes the list ith the initial point which is required for a iterative equation
-    intervalList = [0]
-    interval = 1/numIterations
-    for i in range(1,numIterations):#makes a big list of intervals between 0 and 1 spaced one "interval" apart
-        intervalList.append(i*interval)
-    for i in range(1,numIterations): #Creates the list of all the iterations by referencing the previous entry in the list
-        points.append((r * points[i-1]) * (1- points[i-1]))
-    #for i in range(0, numIterations): #NOTE for testing, shows all the points that will be passed to the graph and their iterator starting with x0
-    #    print(i, points[i])
-    x = intervalList
-    ax2.plot(x, points, linewidth=.7)
-    ax2.set_title("Iterations Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
-    ax2.set_xlabel("Iterations", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
-    ax2.set_ylabel("X Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
-    #End Iteration Plot Section
-    lamCallVar.set(calcLam())
-    #print("r: " + str(r) + " Lam: " + calcLam())
 canvas = FigureCanvasTkAgg(fig, master=root)
-canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, rowspan=4)
+canvas.get_tk_widget().grid(row=0, column=0, columnspan=8, rowspan=4)
 
 ani = animation.FuncAnimation(fig, plotting, interval=1000)
 
 ##Begin lyapunov Section
 
-def calcLam():
-    tempx = x0CallVar.get()
-    r = rCallVar.get()
+def calcLam(rBIn):
+    x = x0CallVar.get()
+    rA = rCallVar.get()
+    rB = rBIn
     sum = 0
-    n = 50
+    initialLoopCount = 50
+    postLoopCount = 50
     lam = 0
-    for _ in range(100):
-        tempx = r * tempx * (-1*tempx + 1)
-
-    for _ in range(n):
-        tempx = r * tempx * (-1*tempx + 1)
-        f=abs(r * (-2*tempx +1 ))
-        if f < 0.0000000001:
-            return "-∞"
+    abList = []
+    for i in range((initialLoopCount + postLoopCount)):
+        if (i % 2) == 0:
+            abList.append(rB)
+            #print("i: " + str(i) + " r= " + str(rB))
         else:
-            sum= sum + (math.log(f))
-    lam = sum / n
-    return str(lam)
+            abList.append(rA)
+            #print("i: " + str(i) + " r= " + str(rA))
+    for i in range(initialLoopCount):
+        x = abList[i] * x * (-1*x + 1)
+        #print("x: " + str(x))
 
-lamCallVar = DoubleVar()
-lamCallVar.set(calcLam())
-lamFrame = Frame(root)
-lamLabelTitle = Label(lamFrame, text="Lyapunov Exponent:", font=fontStyle)
-lamLabelTitle.pack()
-lamLabel = Label(lamFrame, textvariable=lamCallVar, font=fontStyle)
-lamLabel.pack()
-lamFrame.grid(row=5, column=0)
+    for i in range(initialLoopCount, (initialLoopCount + postLoopCount)):
+        x = abList[i] * x * (-1*x + 1)
+        f=abs(abList[i] * (-2*x +1 ))
+        #print("f: "+ str(f))
+        if f < 0.0000000001:
+            return -1000000 #temporary representative of negative infinity
+        else:
+            sum = sum + (math.log(f))
+            #print("else")
+    lam = sum / postLoopCount
+    #print("lam: "+ str(lam))
+    #print("sum: "+ str(sum))
+    return lam
+
+#lamCallVar = DoubleVar()
+#lamCallVar.set(calcLam())
+#lamFrame = Frame(root)
+#lamLabelTitle = Label(lamFrame, text="Lyapunov Exponent:", font=fontStyle)
+#lamLabelTitle.pack()
+#lamLabel = Label(lamFrame, textvariable=lamCallVar, font=fontStyle)
+#lamLabel.pack()
+#lamFrame.grid(row=5, column=0)
 
 #End lyapunov Section
 
