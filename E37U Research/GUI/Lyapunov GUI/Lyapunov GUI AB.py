@@ -38,21 +38,11 @@ fontStyle = tkFont.Font(family="Times New Roman", size=fontSizeDefault)
 
 ##Begin Universal Variables Section
 
-rCallVar = DoubleVar()
-precisionCallVar = IntVar()
-fontSizeCallVar = IntVar()
-
-##End Universal Variables Section
-
-
-##Begin Universal Variables Section
-
 x0CallVar = DoubleVar()
 precisionCallVar = IntVar()
 fontSizeCallVar = IntVar()
 
 ##End Universal Variables Section
-
 
 ##Begin Slider Section
 
