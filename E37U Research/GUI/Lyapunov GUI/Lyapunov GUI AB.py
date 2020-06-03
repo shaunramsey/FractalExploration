@@ -7,6 +7,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import time
 import matplotlib.animation as animation
 import math
+from numba import jit
 
 
 
@@ -143,7 +144,7 @@ def plotting(i):
     monoArray= []
     for i in range(len(rAList)):
         for j in range(len(rBList)):
-            monoArray.append(calcLam(rAList[i], rBList[j]))
+            monoArray.append(calcLam(rAList[i], rBList[j], x0CallVar.get()))
     gridArray = np.array(monoArray)
     gridArray = np.reshape(gridArray, (rAPrecision,rBPrecision))
     ax1.imshow(gridArray ,vmin= -1, vmax=0, cmap=colorMap)
@@ -154,12 +155,12 @@ def plotting(i):
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().grid(row=0, column=0, columnspan=8, rowspan=4)
 
-ani = animation.FuncAnimation(fig, plotting, interval=300000)
+ani = animation.FuncAnimation(fig, plotting, interval=100)
 
 ##Begin lyapunov Section
-
-def calcLam(rAIn, rBIn):
-    x = x0CallVar.get()
+@jit(nopython=True)
+def calcLam(rAIn, rBIn, xIn):
+    x= xIn
     rA = rAIn
     rB = rBIn
     sum = 0
