@@ -13,8 +13,7 @@ import math
 
 aDefault = .5
 bDefault = .5
-sliderPrecision = 0.1 #Universal Slider Precision's default value on program startup
-sliderPrecisionDefault = 2
+precisionDefault = 2
 figureDPI = 50 #DPI value for main figure
 fontSizeDefault = 20 #Default font size
 
@@ -95,17 +94,29 @@ class slider:
     def setRange(self, min, max):
         self.slider.configure(from_=min)
         self.slider.configure(to=max)
+    def setCommand(self, command):
+        self.slider.configure(command=command)
 
 ##End Slider Class
+##Begin Precision Calculator Function
+
+def calcPrecision(input):#Converts integer range of precision (2-10 on the slider) to the decimal place equivalent
+    print("helloooo")
+    temp = "."
+    for _ in range(input-2):
+        temp = temp + "0"
+    return float(temp + "1")
+
+##End Precision Calculator Function
 ##Begin "a" Slider
 
-aSlider = slider(title="a", min=0.1, max=0.9, default=aDefault, fontStyle=fontStyle, precision=sliderPrecision, row=4, column=0, callVar=aCallVar)
+aSlider = slider(title="a", min=0.1, max=0.9, default=aDefault, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=4, column=0, callVar=aCallVar)
 aSlider.makeSlider()
 
 ##End "a" Slider
 ##Begin "b" Slider
 
-bSlider = slider(title="b", min=0, max=1, default=bDefault, fontStyle=fontStyle, precision=sliderPrecision, row=4, column=1, callVar=bCallVar)
+bSlider = slider(title="b", min=0, max=1, default=bDefault, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=4, column=1, callVar=bCallVar)
 bSlider.makeSlider()
 
 ##End "b" Slider
@@ -115,52 +126,35 @@ def rangeTrunkOverride(precision):
     aSlider.setRange(min=precision, max=(1-precision))
     #bSlider.setRange(min=precision, max=(1-precision))
 
-def setSliderPrecision(var):
-    tempPrecision = "."
-    for _ in range((sliderPrecisionSlider.get()-2)):
-        tempPrecision = tempPrecision + "0"
-    sliderPrecision = float(tempPrecision + "1")
-    aSlider.setPrecision(resolution=sliderPrecision)
-    bSlider.setPrecision(resolution=sliderPrecision)
-    rangeTrunkOverride(sliderPrecision)
-    sliderPrecision_sizelabel_var.set(sliderPrecisionSlider.get())
+def precisionChange(var, indx, mode):#Callback function for when precisionCallVar changes
+    precision = calcPrecision(precisionCallVar.get())
+    print("HEllo!")
+    aSlider.setPrecision(resolution=precision)
+    bSlider.setPrecision(resolution=precision)
+    rangeTrunkOverride(precision)
 
-sliderPrecision_sizelabel_var = IntVar()
-sliderPrecision_frame = Frame(root)
-sliderPrecisionSlider_label = Label(sliderPrecision_frame,text="Slider Precision", font=fontStyle)
-sliderPrecisionSlider_label.pack()
-sliderPrecisionSlider_sizelabel = Label(sliderPrecision_frame, textvariable=sliderPrecision_sizelabel_var, font=fontStyle)
-sliderPrecisionSlider_sizelabel.pack()
-sliderPrecisionSlider = Scale(sliderPrecision_frame, from_=2, to=10,orient=HORIZONTAL, command=setSliderPrecision, font=fontStyle, showvalue=0, length=200)
-sliderPrecisionSlider.set(sliderPrecisionDefault)
-sliderPrecision_sizelabel_var.set(sliderPrecisionSlider.get())
-sliderPrecisionSlider.pack()
-sliderPrecision_frame.grid(row=4, column=2)
+precisionCallVar.trace_add("write", precisionChange)#Tying the callback to the Variable
+
+sliderPrecisionSlider = slider(title="Slider Precision", min=2, max=10, default=precisionDefault, fontStyle=fontStyle, precision=1, row=4, column=2, callVar=precisionCallVar)
+sliderPrecisionSlider.makeSlider()
+precisionCallVar.set(5)
 
 ##End Slider Precision Slider Section
 ##Begin Font Slider Section
 
-def setFontSize(var):
-    fontStyle.configure(size=fontSlider.get())
+fontSlider = slider(title="Font Size", min=1, max=30, default=fontSizeDefault, fontStyle=fontStyle, precision=1, row=4, column=3, callVar=fontSizeCallVar)
+fontSlider.makeSlider()
+
+def fontChange(var, indx, mode):#Callback function for when fontSizeCallVar changes
+    fontStyle.configure(size=fontSizeCallVar.get())
     aSlider.setFontStyle(fontStyle=fontStyle)
     bSlider.setFontStyle(fontStyle=fontStyle)
-    fontSlider.configure(font=fontStyle)
-    sliderPrecisionSlider.configure(font=fontStyle)
-    fontsize_sizelabel_var.set(fontSlider.get())
+    fontSlider.setFontStyle(fontStyle=fontStyle)
+    sliderPrecisionSlider.setFontStyle(fontStyle=fontStyle)
 
-fontsize_sizelabel_var = IntVar()
-fontsize_frame = Frame(root)
-fontSlider_label = Label(fontsize_frame,text="Font Size", font=fontStyle)
-fontSlider_label.pack()
-fontSlider_sizelabel = Label(fontsize_frame, textvariable=fontsize_sizelabel_var, font=fontStyle)
-fontSlider_sizelabel.pack()
-fontSlider = Scale(fontsize_frame, from_=1, to=30,orient=HORIZONTAL, command=setFontSize, font=fontStyle, showvalue=0, length=200)
-fontSlider.set(fontSizeDefault)
-fontSlider.pack()
-fontsize_frame.grid(row=4, column=3)
+fontSizeCallVar.trace_add("write", fontChange)#Tying the callback to the Variable
 
-##End Font Slider Selection
-
+##End Font Slider Section
 ##End Slider Section
 ##Begin Plot Section
 
