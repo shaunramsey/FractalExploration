@@ -8,7 +8,6 @@ import time
 import matplotlib.animation as animation
 import math
 
-
 ##Begin Default Values
 
 aDefault = .5
@@ -37,9 +36,12 @@ class bin:
 ##End Bin Class Section
 ##Begin Bin Initialization Section
 
-#def binIni(binSize):
-    #for i in range(binSize):
-        #TODO
+def binIni(binSize):
+    binList= []
+    for i in range(1/binSize):
+        binList.append(bin(start=(i*binSize), end=((i*binSize)+binSize)))
+    return binList
+        
 
 ##End Bin Initialization Section
 
@@ -101,7 +103,6 @@ class slider:
 ##Begin Precision Calculator Function
 
 def calcPrecision(input):#Converts integer range of precision (2-10 on the slider) to the decimal place equivalent
-    print("helloooo")
     temp = "."
     for _ in range(input-2):
         temp = temp + "0"
@@ -128,7 +129,6 @@ def rangeTrunkOverride(precision):
 
 def precisionChange(var, indx, mode):#Callback function for when precisionCallVar changes
     precision = calcPrecision(precisionCallVar.get())
-    print("HEllo!")
     aSlider.setPrecision(resolution=precision)
     bSlider.setPrecision(resolution=precision)
     rangeTrunkOverride(precision)
