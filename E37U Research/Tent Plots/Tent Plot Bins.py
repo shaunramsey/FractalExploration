@@ -18,18 +18,15 @@ class bin:
         return self.binContent
     def getID(self):
         return (str(self.start) + "," + str(self.end))
-    def isInRange(self, rangeStart, rangeEnd):#TODO Add handling for partial bins
-        if rangeStart > rangeEnd:
-            rangeStart, rangeEnd = rangeEnd, rangeStart
-        if self.start >= rangeStart and self.end <= rangeEnd:
-            return True
-        else:
-            return False
     def percentageOfRange(self, rangeStart, rangeEnd):
         if rangeStart > rangeEnd:
             rangeStart, rangeEnd = rangeEnd, rangeStart
-        if self.isInRange(rangeStart, rangeEnd) == True:
-            return self.binSize /(rangeEnd - rangeStart)
+        #The logic for testing if two ranges intersect comes from Ned Batchelder's blog:
+        #https://nedbatchelder.com/blog/201310/range_overlap_in_two_compares.html
+        if self.end >=rangeStart and rangeEnd >= self.start:  
+            #The logic for finding the intersection of the two ranges is inspired by User Oscar Smith's reply on StackExchange:
+            #https://codereview.stackexchange.com/questions/178427/given-2-disjoint-sets-of-intervals-find-the-intersections/178432#178432
+            return ((min(self.end, rangeEnd)-max(self.start, rangeStart))/(rangeEnd-rangeStart))
         else:
             return 0
             
@@ -121,7 +118,7 @@ for i in range(int(1/binSize)):
     print("yEnd: " + str(yEnd))
     contentTotal = 0
     #print(i)
-    for j in range(len(binsForDayz)): #NOTE This assumes no bins will ever need multiple contents added to them in some way
+    for j in range(len(binsForDayz)):
         tempPercentage = binsForDayz[j].percentageOfRange(rangeStart = yStart, rangeEnd = yEnd)
         binsForDayz[j].addContent(tempPercentage)
         contentTotal = contentTotal + tempPercentage
