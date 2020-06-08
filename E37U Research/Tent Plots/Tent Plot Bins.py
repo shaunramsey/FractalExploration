@@ -1,4 +1,4 @@
-binSize = .1
+binSize = .25
 
 class bin:
     def __init__(self, **kwargs):
@@ -10,18 +10,24 @@ class bin:
         self.binSize = self.end - self.start
     def setContent(self, content):
         self.binContent = content
+    def addContent(self, content):
+        self.binContent = self.binContent + content
     def clearContent(self):
         self.binContent = 0
     def getContent(self):
         return self.binContent
     def getID(self):
         return (str(self.start) + "," + str(self.end))
-    def isInRange(self, rangeStart, rangeEnd):
+    def isInRange(self, rangeStart, rangeEnd):#TODO Add handling for partial bins
+        if rangeStart > rangeEnd:
+            rangeStart, rangeEnd = rangeEnd, rangeStart
         if self.start >= rangeStart and self.end <= rangeEnd:
             return True
         else:
             return False
     def percentageOfRange(self, rangeStart, rangeEnd):
+        if rangeStart > rangeEnd:
+            rangeStart, rangeEnd = rangeEnd, rangeStart
         if self.isInRange(rangeStart, rangeEnd) == True:
             return self.binSize /(rangeEnd - rangeStart)
         else:
@@ -85,7 +91,7 @@ class tentEquation: #TODO expand to have full functionality to modify, etc
         self.equation0 = equation0
         self.equation1 = equation1
         self.alpha = alpha
-    #def getX(self, y): #cant pass only one point so not writing now for ease
+    #def getX(self, y): #Cant pass only one point back because, well you know, so not writing now for ease
     def getY(self, x):
         if x <= self.alpha:
             return self.equation0.getY(x)
@@ -93,8 +99,6 @@ class tentEquation: #TODO expand to have full functionality to modify, etc
             return self.equation1.getY(x)
 
 def binIni(binSize):
-    print(3*binSize)
-    print(binSize)
     binList = []
     for i in range(0, int(1/binSize)):
         print(int(1/binSize))
@@ -105,29 +109,28 @@ def binIni(binSize):
 binsForDayz = binIni(binSize)
 bigEquation = tentEquation(equation0=equation(m=2), equation1=equation(m=-2, b=2), alpha=.5)
 
+def printBIN():
+    for i in range(len(binsForDayz)):
+        print (str(binsForDayz[i].getID()) + ", Content: " + str(binsForDayz[i].getContent()))
+
 for i in range(int(1/binSize)):
-    yStart = bigEquation.getY(i/10)
-    yEnd = bigEquation.getY(i/10 + binSize)
+    yStart = bigEquation.getY(i * binSize)
+    yEnd = bigEquation.getY((i+1) * binSize)
     print("I: " +str(i))
-    print("yStart: " + str(bigEquation.getY(i/10)))
-    print("yEnd: " + str(bigEquation.getY(i/10 + binSize)))
+    print("yStart: " + str(yStart))
+    print("yEnd: " + str(yEnd))
     contentTotal = 0
     #print(i)
     for j in range(len(binsForDayz)): #NOTE This assumes no bins will ever need multiple contents added to them in some way
         tempPercentage = binsForDayz[j].percentageOfRange(rangeStart = yStart, rangeEnd = yEnd)
-        if tempPercentage == 1:
-            binsForDayz[i].setContent(1)
-            contentTotal = 1
-        elif tempPercentage > 0:
-            binsForDayz[i].setContent(tempPercentage)
-            contentTotal = contentTotal + tempPercentage
-        if contentTotal == 1:
+        binsForDayz[j].addContent(tempPercentage)
+        contentTotal = contentTotal + tempPercentage
+        if contentTotal >= 1:
             break
-
-
+    printBIN()
 
 #print(str(bigEquation.getM()))
 #print(str(bigEquation.getB()))
 #print("Length of list: "+ str(len(binsForDayz)))
-for i in range(len(binsForDayz)):
-    print (str(binsForDayz[i].getID()) + ", Content: " + str(binsForDayz[i].getContent()))
+#for i in range(len(binsForDayz)):
+#    print (str(binsForDayz[i].getID()) + ", Content: " + str(binsForDayz[i].getContent()))

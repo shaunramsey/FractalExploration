@@ -137,7 +137,7 @@ precisionCallVar.trace_add("write", precisionChange)#Tying the callback to the V
 
 sliderPrecisionSlider = slider(title="Slider Precision", min=2, max=10, default=precisionDefault, fontStyle=fontStyle, precision=1, row=4, column=2, callVar=precisionCallVar)
 sliderPrecisionSlider.makeSlider()
-precisionCallVar.set(5)
+precisionCallVar.set(precisionDefault)
 
 ##End Slider Precision Slider Section
 ##Begin Font Slider Section
