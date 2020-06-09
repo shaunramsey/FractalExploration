@@ -30,7 +30,7 @@ class bin:
         else:
             return 0
             
-
+            
 class equation:
     def __init__(self, **kwargs):
         self.m = kwargs.get('m')
@@ -124,7 +124,7 @@ for i in range(int(1/binSize)):
         contentTotal = contentTotal + tempPercentage
         if contentTotal >= 1:
             break
-    printBIN()
+    #printBIN()
 
 #print(str(bigEquation.getM()))
 #print(str(bigEquation.getB()))

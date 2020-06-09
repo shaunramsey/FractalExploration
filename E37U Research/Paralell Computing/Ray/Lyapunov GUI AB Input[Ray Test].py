@@ -7,7 +7,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import time
 import matplotlib.animation as animation
 import math
-
+import ray
+ray.init()
+#NOTE Ray does not work in windows
 
 
 ##Begin Default Values
@@ -174,6 +176,7 @@ canvas.get_tk_widget().grid(row=0, column=0, columnspan=8, rowspan=4)
 ani = animation.FuncAnimation(fig, plotting, interval=1000)
 
 ##Begin lyapunov Section
+@ray.remote
 def calcLam(rAIn, rBIn, xIn, abStringIn):
     x = xIn
     rA = rAIn
