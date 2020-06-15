@@ -69,17 +69,24 @@ class equation:
         self.m = kwargs.get('m')
         self.b = kwargs.get('b')
 
+        self.isPointBased = False
+        #TODO Add logic for handling if nothing is passed in, i.e. also a "self.isMB_Based"
+
         if self.m == None:
             self.m = 0.0
 
         if self.b == None:
             self.b = 0.0
 
+
         self.xi = kwargs.get('xi')
         self.xf = kwargs.get('xf')
         self.yi = kwargs.get('yi')
         self.yf = kwargs.get('yf')
 
+        if self.xi != None or self.xf != None or self.yi != None or self.yf == None:
+            self.isPointBased = True
+        #TODO clean up logic here
         if self.xi == None:
             self.xi = 0.0
 
@@ -95,17 +102,18 @@ class equation:
         self.calcEQ()
        
     def calcEQ(self):
-        self.m = ((self.yf - self.yi)/(self.xf - self.xi))
-        self.b = (self.xi - self.m * self.xi)
+        if self.isPointBased == True:
+            self.m = ((self.yf - self.yi)/(self.xf - self.xi))
+            self.b = (self.yi - self.m * self.xi)
     def getString(self):
         if self.m == 0:
             return self.b
         if self.b > 0:
-            return str(self.m) + "x+" + str(self.b)
+            return "{0:.2f}".format(self.m) + "x+" + "{0:.2f}".format(self.b)
         elif self.b < 0:
-            return str(self.m) + "x" + str(self.b)
+            return "{0:.2f}".format(self.m) + "x" + "{0:.2f}".format(self.b)
         else:
-            return str(self.m) + "x"
+            return "{0:.2f}".format(self.m) + "x"
     def getM(self):
         return self.m
     def getB(self):
@@ -141,15 +149,18 @@ class equation:
     def getX(self, y):
         return((y-self.b)/self.m)
     def getY(self, x):
+        #print("M:" + str(self.m) + " B:" + str(self.b) + " x:" + str(x) + " y:" + str((x * self.m)+self.b))
         return((x * self.m)+self.b)
 
     def setInitialPoint(self, x, y):
         self.xi = x
         self.yi = y
+        self.isPointBased = True
         self.calcEQ()
     def setFinalPoint(self, x, y):
         self.xf = x
         self.yf = y
+        self.isPointBased = True
         self.calcEQ()
 
 class tentEquation:
@@ -158,12 +169,8 @@ class tentEquation:
         self.equation1 = equation1
     #def getX(self, y): #Cant pass only one point back because, well you know, so not writing now for ease
     def getIntersection(self):
-        a = self.equation0.m
-        b = self.equation1.m
-        c = self.equation0.b
-        d = self.equation1.b
-        x = ((d-c)/(a-b))
-        y = (a * (d-c)/(a-b)+c)
+        x = self.equation0.xf
+        y = self.equation0.yf
         return (x,y)
 
     def getY(self, x):
@@ -171,6 +178,11 @@ class tentEquation:
             return self.equation0.getY(x)
         else:
             return self.equation1.getY(x)
+    def getSlope(self, x):
+        if x <= self.getIntersection()[0]:
+            return self.equation0.m
+        else:
+            return self.equation1.m
 
 ##End Equation Class Section
 ##End Equation Section
@@ -258,8 +270,8 @@ initialXSlider.makeSlider()
 
 def initialXTrace(ver, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
     AX = initialXCallVar.get()
-    if 0 <= AX and AX < min(equation2.xi, equation2.xf):#NOTE Deliberate choice to use equation 2's peak x, should not affect math
-        equation1.xi = AX
+    if 0 <= AX and AX < min(equation2.xi, equation2.xf):#NOTE Deliberate choice to use equation 2's peak x, should not affect math        
+        equation1.setInitialPoint(x=AX, y=equation1.yi)
     else:
         print("Initial X Error: Slider out of range")
 
@@ -271,7 +283,7 @@ initialYSlider.makeSlider()
 def initialYTrace(ver, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
     AY = initialYCallVar.get()
     if 0 <= AY and AY < equation1.yf:#NOTE Deliberate choice to use equation 1's peak y, should not affect math
-        equation1.yi = AY
+        equation1.setInitialPoint(x=equation1.xi, y=AY)
     else:
         print("Initial Y Error: Slider out of range")
 
@@ -286,10 +298,8 @@ peakXSlider.makeSlider()
 def peakXTrace(var, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
     BX = peakXCallVar.get()
     if equation1.xi < BX and BX < equation2.xf:
-        #equation1.setFinalPoint(x=peakXCallVar.get(), y=equation1.yf) #While these two calls are proper usage of methods, they are inefficient compared to just writing to the variables inside
-        #equation2.setInitialPoint(x=peakXCallVar.get(), y=equation2.yi)
-        equation1.xf = BX
-        equation2.xi = BX
+        equation1.setFinalPoint(x=BX, y=equation1.yf)
+        equation2.setInitialPoint(x=BX, y=equation2.yi)
     else:
         print("Peak X Error: Slider out of range")
 
@@ -301,8 +311,8 @@ peakYSlider.makeSlider()
 def peakYTrace(var, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
     BY = peakYCallVar.get()
     if max(equation1.yi, equation2.yf) < BY and BY <= 1:
-        equation1.yf = BY
-        equation2.yi = BY
+        equation1.setFinalPoint(x=equation1.xf, y=BY)
+        equation2.setInitialPoint(x=equation2.xi, y=BY)
     else:
         print("Peak Y Error: Slider out of range")
 
@@ -317,7 +327,7 @@ endXSlider.makeSlider()
 def endXTrace(var, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
     CX = endXCallVar.get()
     if max(equation1.xi, equation1.xf) < CX and CX <= 1: #NOTE Deliberate choice to use equation 1's peak x, should not affect math
-        equation2.xf = CX
+        equation2.setFinalPoint(x=CX, y=equation2.yf)
     else:
         print("End X Error: Slider out of range")
 
@@ -329,7 +339,7 @@ endYSlider.makeSlider()
 def endYTrace(var, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
     CY = endYCallVar.get()
     if 0 <= CY and CY < equation2.yi: #NOTE Deliberate choice to use equation 2's peak y, should not affect math
-        equation2.yf = CY
+        equation2.setFinalPoint(x=equation2.xf, y=CY)
     else:
         print("End Y Error: Slider out of range")
 
@@ -337,6 +347,13 @@ endYCallVar.trace_add("write", endYTrace) #Tying the trace to the variable so wh
 
 ##End End Slider Section
 ##End Peak Point Slider Section
+##Begin x0 Slider Section
+
+x0CallVar = DoubleVar()
+x0Slider = slider(title="X0 Slider", min =0, max =1, default=.5, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=4, column=4, callVar=x0CallVar)
+x0Slider.makeSlider()
+
+##End x0 Slider Section
 ##Begin Precision Slider Section
 def rangeTrunkOverride(precision):
     initialXSlider.setRange(min=0, max=(1-precision))
@@ -350,6 +367,7 @@ def rangeTrunkOverride(precision):
 
 def precisionChange(var, indx, mode):#Callback function for when precisionCallVar changes
     precision = calcPrecision(precisionCallVar.get())
+    x0Slider.setPrecision(resolution=precision)
 
     initialXSlider.setPrecision(resolution=precision)
     initialYSlider.setPrecision(resolution=precision)
@@ -383,7 +401,12 @@ def fontChange(var, indx, mode):#Callback function for when fontSizeCallVar chan
     endXSlider.setFontStyle(fontStyle=fontStyle)
     endYSlider.setFontStyle(fontStyle=fontStyle)
     fontSlider.setFontStyle(fontStyle=fontStyle)
+    x0Slider.setFontStyle(fontStyle=fontStyle)
     sliderPrecisionSlider.setFontStyle(fontStyle=fontStyle)
+    eq1LabelTitle.setFontStyle(fontStyle=fontStyle)
+    eq1Label.setFontStyle(fontStyle=fontStyle)
+    eq2LabelTitle.setFontStyle(fontStyle=fontStyle)
+    eq2Label.setFontStyle(fontStyle=fontStyle)
 
 fontSizeCallVar.trace_add("write", fontChange)#Tying the callback to the Variable
 
@@ -395,20 +418,22 @@ def calcLam(teq1, teq2, x0):
     x = x0
     sum = 0
     tempEquation = tentEquation(teq1, teq2)
+    #print("e1: " + str(teq1.m) + " e2: " + str(teq2.m))
     initialLoopCount = 100
     postLoopCount = 100
     totalLoopCount = initialLoopCount + postLoopCount
     lam = 0
+    #print("eq1: " + teq1.getString())
+    #print("eq2: " + teq2.getString())
     for i in range(initialLoopCount):
+        print("I: " + str(i) + " X: " + str(x))
         x = tempEquation.getY(x)
-    for i in range(initialLoopCount, totalLoopCount):#TODO FIXME FIXME FIXME
+    for _ in range(initialLoopCount, totalLoopCount):#TODO FIXME FIXME FIXME
+        m = tempEquation.getSlope(x)
+        f=np.log(np.abs(m))#TODO FIXME FIXME FIXME
         x = tempEquation.getY(x)
-        #f=np.abs(Funcp(x, getB(i, b1, b2), a))#TODO FIXME FIXME FIXME
-        #if f < 0.0000000001:#TODO Determine if necessary 
-        #    return -1000000 #Representative of negative infinity
-        #else:
-        #    sum = sum + (np.log(f))
-        sum = sum + (np.log(x))
+        #print(str(m), str(x))
+        sum = sum + f
     lam = sum / postLoopCount
     return lam
 
@@ -424,6 +449,25 @@ lamLabel.pack()
 lamFrame.grid(row=4, column=0)
 
 ##End Lam Label
+##Begin Equation Labels
+
+eq1LabelCallVar = StringVar()
+eq1LabelFrame = Frame(root)
+eq1LabelTitle = Label(eq1LabelFrame, text="Equation 1:", font=fontStyle)
+eq1LabelTitle.pack()
+eq1Label = Label(eq1LabelFrame, textvariable=eq1LabelCallVar, font=fontStyle)
+eq1Label.pack()
+eq1LabelFrame.grid(row=4, column=1)
+
+eq2LabelCallVar = StringVar()
+eq2LabelFrame = Frame(root)
+eq2LabelTitle = Label(eq2LabelFrame, text="Equation 2:", font=fontStyle)
+eq2LabelTitle.pack()
+eq2Label = Label(eq2LabelFrame, textvariable=eq2LabelCallVar, font=fontStyle)
+eq2Label.pack()
+eq2LabelFrame.grid(row=4, column=2)
+
+##End Equation Labels
 ##Begin Plot Section
 
 fig = plt.figure()
@@ -441,7 +485,9 @@ def plotting(i):
     ax1.set_xlim(0,1)
     ax1.set_ylim(0,1.5)
     ax1.grid(True)
-    lamCallVar.set(calcLam(teq1=equation1, teq2=equation2, x0=.5))#TODO initial x FIX
+    lamCallVar.set(calcLam(teq1=equation1, teq2=equation2, x0=x0CallVar.get()))
+    eq1LabelCallVar.set(equation1.getString())
+    eq2LabelCallVar.set(equation2.getString())
 
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, rowspan=4)
