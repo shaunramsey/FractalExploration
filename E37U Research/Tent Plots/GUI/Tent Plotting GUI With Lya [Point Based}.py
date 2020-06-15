@@ -242,58 +242,146 @@ def calcPrecision(input):#Converts integer range of precision (2-10 on the slide
 equation1 = equation(xi=0, xf=.5, yi=0, yf=1)
 equation2 = equation(xi=.5, xf=1, yi=1, yf=0)
 
+initialXCallVar = DoubleVar()
+initialYCallVar = DoubleVar()
+
 peakXCallVar = DoubleVar()
 peakYCallVar = DoubleVar()
 
-peakXSlider = slider(title="Peak X Slider", min=.1, max=.9, default=.5, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=4, column=0, callVar=peakXCallVar)
+endXCallVar = DoubleVar()
+endYCallVar = DoubleVar()
+
+##Begin Initial Slider Section
+
+initialXSlider = slider(title="Initial Point X Slider", min=0, max=.9, default=0, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=0, column=4, callVar=initialXCallVar)
+initialXSlider.makeSlider()
+
+def initialXTrace(ver, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
+    AX = initialXCallVar.get()
+    if 0 <= AX and AX < min(equation2.xi, equation2.xf):#NOTE Deliberate choice to use equation 2's peak x, should not affect math
+        equation1.xi = AX
+    else:
+        print("Initial X Error: Slider out of range")
+
+initialXCallVar.trace_add("write", initialXTrace) #Tying the trace to the variable so when the variable changes the equations are modified
+
+initialYSlider = slider(title="Initial Point Y Slider", min=0, max=.9, default=0, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=0, column=5, callVar=initialYCallVar)
+initialYSlider.makeSlider()
+
+def initialYTrace(ver, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
+    AY = initialYCallVar.get()
+    if 0 <= AY and AY < equation1.yf:#NOTE Deliberate choice to use equation 1's peak y, should not affect math
+        equation1.yi = AY
+    else:
+        print("Initial Y Error: Slider out of range")
+
+initialYCallVar.trace_add("write", initialYTrace) #Tying the trace to the variable so when the variable changes the equations are modified
+
+##End Initial Slider Section
+##Begin Peak Slider Section
+
+peakXSlider = slider(title="Peak X Slider", min=.1, max=.9, default=.5, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=1, column=4, callVar=peakXCallVar)
 peakXSlider.makeSlider()
 
-peakYSlider = slider(title="Peak Y Slider", min=.1, max=1, default=1, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=4, column=1, callVar=peakYCallVar)
+def peakXTrace(var, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
+    BX = peakXCallVar.get()
+    if equation1.xi < BX and BX < equation2.xf:
+        #equation1.setFinalPoint(x=peakXCallVar.get(), y=equation1.yf) #While these two calls are proper usage of methods, they are inefficient compared to just writing to the variables inside
+        #equation2.setInitialPoint(x=peakXCallVar.get(), y=equation2.yi)
+        equation1.xf = BX
+        equation2.xi = BX
+    else:
+        print("Peak X Error: Slider out of range")
+
+peakXCallVar.trace_add("write", peakXTrace) #Tying the trace to the variable so when the variable changes the equations are modified
+
+peakYSlider = slider(title="Peak Y Slider", min=.1, max=1, default=1, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=1, column=5, callVar=peakYCallVar)
 peakYSlider.makeSlider()
 
-def traceX1(var, indx, mode):
-    equation1.setFinalPoint(x=peakXCallVar.get(), y=equation1.yf)
-def traceX2(var, indx, mode):
-    equation2.setInitialPoint(x=peakXCallVar.get(), y=equation2.yi)
-def traceY1(var, indx, mode):
-    equation1.setFinalPoint(x=equation1.xf, y=peakYCallVar.get())
-def traceY2(var, indx, mode):
-    equation2.setInitialPoint(x=equation2.xi, y=peakYCallVar.get())
+def peakYTrace(var, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
+    BY = peakYCallVar.get()
+    if max(equation1.yi, equation2.yf) < BY and BY <= 1:
+        equation1.yf = BY
+        equation2.yi = BY
+    else:
+        print("Peak Y Error: Slider out of range")
 
-peakXCallVar.trace_add("write", traceX1) #Tying the callback to the Variable
-peakXCallVar.trace_add("write", traceX2) #Tying the callback to the Variable
+peakYCallVar.trace_add("write", peakYTrace) #Tying the trace to the variable so when the variable changes the equations are modified
 
-peakYCallVar.trace_add("write", traceY1) #Tying the callback to the Variable
-peakYCallVar.trace_add("write", traceY2) #Tying the callback to the Variable
+##End Peak Slider Section
+##Begin End Slider Section
 
+endXSlider = slider(title="End Point X Slider", min=.1, max=1, default=1, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=2, column=4, callVar=endXCallVar)
+endXSlider.makeSlider()
+
+def endXTrace(var, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
+    CX = endXCallVar.get()
+    if max(equation1.xi, equation1.xf) < CX and CX <= 1: #NOTE Deliberate choice to use equation 1's peak x, should not affect math
+        equation2.xf = CX
+    else:
+        print("End X Error: Slider out of range")
+
+endXCallVar.trace_add("write", endXTrace) #Tying the trace to the variable so when the variable changes the equations are modified
+
+endYSlider = slider(title="End Point Y Slider", min=0, max=.9, default=0, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=2, column=5, callVar=endYCallVar)
+endYSlider.makeSlider()
+
+def endYTrace(var, indx, mode): #Trace to handle testing for sensible input and if verified, modifying the equations
+    CY = endYCallVar.get()
+    if 0 <= CY and CY < equation2.yi: #NOTE Deliberate choice to use equation 2's peak y, should not affect math
+        equation2.yf = CY
+    else:
+        print("End Y Error: Slider out of range")
+
+endYCallVar.trace_add("write", endYTrace) #Tying the trace to the variable so when the variable changes the equations are modified
+
+##End End Slider Section
 ##End Peak Point Slider Section
 ##Begin Precision Slider Section
 def rangeTrunkOverride(precision):
+    initialXSlider.setRange(min=0, max=(1-precision))
+    initialYSlider.setRange(min=0, max=(1-precision))
+    
     peakXSlider.setRange(min=precision, max=(1-precision))
-    peakYSlider.setRange(min=precision, max=peakYSlider.max)
+    peakYSlider.setRange(min=precision, max=1)
+
+    endXSlider.setRange(min=precision, max=1)
+    endYSlider.setRange(min=0, max=(1-precision))
 
 def precisionChange(var, indx, mode):#Callback function for when precisionCallVar changes
     precision = calcPrecision(precisionCallVar.get())
+
+    initialXSlider.setPrecision(resolution=precision)
+    initialYSlider.setPrecision(resolution=precision)
+
     peakXSlider.setPrecision(resolution=precision)
     peakYSlider.setPrecision(resolution=precision)
+
+    endXSlider.setPrecision(resolution=precision)
+    endYSlider.setPrecision(resolution=precision)
+
     rangeTrunkOverride(precision)
 
 precisionCallVar.trace_add("write", precisionChange)#Tying the callback to the Variable
 
-sliderPrecisionSlider = slider(title="Slider Precision", min=2, max=10, default=precisionDefault, fontStyle=fontStyle, precision=1, row=4, column=3, callVar=precisionCallVar)
+sliderPrecisionSlider = slider(title="Slider Precision", min=2, max=10, default=precisionDefault, fontStyle=fontStyle, precision=1, row=3, column=4, callVar=precisionCallVar)
 sliderPrecisionSlider.makeSlider()
 precisionCallVar.set(precisionDefault)
 
 ##End Slider Precision Slider Section
 ##Begin Font Slider Section
 
-fontSlider = slider(title="Font Size", min=1, max=30, default=fontSizeDefault, fontStyle=fontStyle, precision=1, row=4, column=4, callVar=fontSizeCallVar)
+fontSlider = slider(title="Font Size", min=1, max=30, default=fontSizeDefault, fontStyle=fontStyle, precision=1, row=3, column=5, callVar=fontSizeCallVar)
 fontSlider.makeSlider()
 
 def fontChange(var, indx, mode):#Callback function for when fontSizeCallVar changes
     fontStyle.configure(size=fontSizeCallVar.get())
+    initialXSlider.setFontStyle(fontStyle=fontStyle)
+    initialYSlider.setFontStyle(fontStyle=fontStyle)
     peakXSlider.setFontStyle(fontStyle=fontStyle)
     peakYSlider.setFontStyle(fontStyle=fontStyle)
+    endXSlider.setFontStyle(fontStyle=fontStyle)
+    endYSlider.setFontStyle(fontStyle=fontStyle)
     fontSlider.setFontStyle(fontStyle=fontStyle)
     sliderPrecisionSlider.setFontStyle(fontStyle=fontStyle)
 
@@ -333,7 +421,7 @@ lamLabelTitle = Label(lamFrame, text="Lyapunov Exponent:", font=fontStyle)
 lamLabelTitle.pack()
 lamLabel = Label(lamFrame, textvariable=lamCallVar, font=fontStyle)
 lamLabel.pack()
-lamFrame.grid(row=0, column=4)
+lamFrame.grid(row=4, column=0)
 
 ##End Lam Label
 ##Begin Plot Section
