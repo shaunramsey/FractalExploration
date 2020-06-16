@@ -403,10 +403,10 @@ def fontChange(var, indx, mode):#Callback function for when fontSizeCallVar chan
     fontSlider.setFontStyle(fontStyle=fontStyle)
     x0Slider.setFontStyle(fontStyle=fontStyle)
     sliderPrecisionSlider.setFontStyle(fontStyle=fontStyle)
-    eq1LabelTitle.setFontStyle(fontStyle=fontStyle)
-    eq1Label.setFontStyle(fontStyle=fontStyle)
-    eq2LabelTitle.setFontStyle(fontStyle=fontStyle)
-    eq2Label.setFontStyle(fontStyle=fontStyle)
+    #eq1LabelTitle.setFontStyle(fontStyle=fontStyle)#FIXME
+    #eq1Label.setFontStyle(fontStyle=fontStyle)#FIXME
+    #eq2LabelTitle.setFontStyle(fontStyle=fontStyle)#FIXME
+    #eq2Label.setFontStyle(fontStyle=fontStyle)#FIXME
 
 fontSizeCallVar.trace_add("write", fontChange)#Tying the callback to the Variable
 
@@ -426,7 +426,7 @@ def calcLam(teq1, teq2, x0):
     #print("eq1: " + teq1.getString())
     #print("eq2: " + teq2.getString())
     for i in range(initialLoopCount):
-        print("I: " + str(i) + " X: " + str(x))
+        #print("I: " + str(i) + " X: " + str(x))
         x = tempEquation.getY(x)
     for _ in range(initialLoopCount, totalLoopCount):#TODO FIXME FIXME FIXME
         m = tempEquation.getSlope(x)
@@ -482,8 +482,8 @@ def plotting(i):
     ax1.set_title("Tent Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
     ax1.set_xlabel("X Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
     ax1.set_ylabel("Y Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
-    ax1.set_xlim(0,1)
-    ax1.set_ylim(0,1.5)
+    #ax1.set_xlim(0,1)
+    #ax1.set_ylim(0,1.5)
     ax1.grid(True)
     lamCallVar.set(calcLam(teq1=equation1, teq2=equation2, x0=x0CallVar.get()))
     eq1LabelCallVar.set(equation1.getString())
