@@ -115,6 +115,35 @@ class slider:
         self.slider.configure(command=command)
 
 ##End Slider Class
+##Begin Slider In Frame Class
+
+class sliderInFrame(slider):
+    def __init__(self, root, title, min, max, default, fontStyle, precision, callVar):
+        self.root = root
+        self.title = title
+        self.min = min
+        self.max = max
+        self.default = default
+        self.fontStyle = fontStyle
+        self.precision = precision
+        self.callVar = callVar
+        self.callVar.set(self.default)
+    def makeSlider(self):
+        self.frame = Frame(self.root)
+        self.sliderLabel = Label(self.frame,text=self.title, font=self.fontStyle)
+        self.sliderLabel.pack()
+        self.entry = Entry(self.frame, textvariable=self.callVar, font=self.fontStyle)
+        self.entry.pack()
+        self.slider = Scale(self.frame, from_=self.min, to=self.max, orient=HORIZONTAL, variable=self.callVar, font=self.fontStyle, showvalue=0, length=200, resolution=self.precision)
+        self.slider.pack()
+
+    def pack(self):
+        self.frame.pack()
+    
+    def packSide(self, side):
+        self.frame.pack(side=side)
+
+##End Slider In Frame Class
 ##Begin Precision Calculator Function
 
 def calcPrecision(input):#Converts integer range of precision (2-10 on the slider) to the decimal place equivalent
@@ -127,7 +156,8 @@ def calcPrecision(input):#Converts integer range of precision (2-10 on the slide
 ##Begin x0 Slider Section
 
 x0CallVar = DoubleVar()
-x0Slider = slider(title="X0 Slider", min=0, max=1, default=.5, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=4, column=4, callVar=x0CallVar)
+x0CallVar.set(.5)
+x0Slider = slider(title="X0 Slider", min=0, max=1, default=.5, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=1, column=4, callVar=x0CallVar)
 x0Slider.makeSlider()
 
 ##End x0 Slider Section
@@ -136,24 +166,28 @@ x0Slider.makeSlider()
 def precisionChange(var, indx, mode):#Callback function for when precisionCallVar changes
     precision = calcPrecision(precisionCallVar.get())
     x0Slider.setPrecision(resolution=precision)
+    #pointAddXSlider.setPrecision(resolution=precision) #FIXME
+    #pointAddYSlider.setPrecision(resolution=precision) #FIXME
 
 
 precisionCallVar.trace_add("write", precisionChange)#Tying the callback to the Variable
 
-sliderPrecisionSlider = slider(title="Slider Precision", min=2, max=10, default=precisionDefault, fontStyle=fontStyle, precision=1, row=3, column=4, callVar=precisionCallVar)
+sliderPrecisionSlider = slider(title="Slider Precision", min=2, max=10, default=precisionDefault, fontStyle=fontStyle, precision=1, row=2, column=4, callVar=precisionCallVar)
 sliderPrecisionSlider.makeSlider()
 precisionCallVar.set(precisionDefault)
 
 ##End Slider Precision Slider Section
 ##Begin Font Slider Section
 
-fontSlider = slider(title="Font Size", min=1, max=30, default=fontSizeDefault, fontStyle=fontStyle, precision=1, row=3, column=5, callVar=fontSizeCallVar)
+fontSlider = slider(title="Font Size", min=1, max=30, default=fontSizeDefault, fontStyle=fontStyle, precision=1, row=3, column=4, callVar=fontSizeCallVar)
 fontSlider.makeSlider()
 
 def fontChange(var, indx, mode):#Callback function for when fontSizeCallVar changes
     fontStyle.configure(size=fontSizeCallVar.get())
     fontSlider.setFontStyle(fontStyle=fontStyle)
     x0Slider.setFontStyle(fontStyle=fontStyle)
+    #pointAddXSlider.setFontStyle(fontStyle=fontStyle) #FIXME
+    #pointAddYSlider.setFontStyle(fontStyle=fontStyle) #FIXME
     sliderPrecisionSlider.setFontStyle(fontStyle=fontStyle)
 
 fontSizeCallVar.trace_add("write", fontChange)#Tying the callback to the Variable
@@ -199,8 +233,10 @@ class pointRegister:
         try:
             del self.pointList[index]
             self.listSort
+            x0Temp = x0CallVar.get()
             x0Slider.setRange(min=self.getPointByIndex(0)[0], max=self.getPointByIndex(self.getLength()-1)[0])
-            x0CallVar.set(self.getPointByIndex(0)[0])
+            if self.isInRange(x0Temp) == False:
+                x0CallVar.set(self.getLastPoint()[0])
         except:
             print("Error, point not found") #TODO make this an error on the GUI
     
@@ -215,9 +251,17 @@ class pointRegister:
 
     def getPointStringList(self):
         tempList = []
-        for _ in range(self.getLength):
-            tempList.append()
-        return self.pointList
+        for p in self.getPointList():
+            tempList.append(str(p))
+        return tempList
+
+    def getLastPoint(self):
+        return self.getPointByIndex(self.getLength()-1)
+
+    def isInRange(self, x):
+        if x >= self.getPointByIndex(0)[0] and x <= self.getLastPoint()[0]:
+            return True
+        return False
 
 class equationRegister:
     def __init__(self):
@@ -322,39 +366,91 @@ equations.buildEquations(points)
 ##End Points and Equations Section
 ##Begin Point Entry Section
 
-pointEntryFrame = Frame(root)
+pointFrame = Frame(root)
+
+##Begin Point Selection And Deletion Section
+
+pointDeleteFrame = Frame(pointFrame)
 
 ##Begin Point Dropdown
 
-pointEntryDropdownFrame = Frame(pointEntryFrame)
+pointDropdownFrame = Frame(pointDeleteFrame)
 
-pointSelectionCallVar = StringVar() ##TODO Maybe theres a way to modify the definition to work with tuples
+pointSelectionCallVar = StringVar()
 pointSelectionCallVar.set(str(points.getPointByIndex(0)))
 
-pointEntryDropdownLabel = Label(pointEntryDropdownFrame, text="Select Point:", font=fontStyle)
-pointEntryDropdownLabel.pack()
+pointSelectionLabel = Label(pointDropdownFrame, text="Select Point:", font=fontStyle)
+pointSelectionLabel.pack()
 
-pointDropDown = OptionMenu(pointEntryDropdownFrame, pointSelectionCallVar, *points.getPointList()) #NOTE Ignore warning
-pointDropDown.pack()
 
-pointEntryDropdownFrame.pack()
+pointSelectionDropDown = OptionMenu(pointDropdownFrame, pointSelectionCallVar, *points.getPointStringList()) #NOTE Ignore warning
+pointSelectionDropDown.pack()
+
+pointDropdownFrame.pack(side=LEFT)
 
 ##End Point Dropdown
+##Begin Point Delete Button
 
 def deletePoint():
     for i in range(points.getLength()):
         if pointSelectionCallVar.get() == str(points.getPointByIndex(i)):
             points.removePointByIndex(i)
             equations.buildEquations(points)
-            pointDropDown["menu"].delete(i)
-            pointSelectionCallVar.set(points.getPointByIndex(0))
-            #pointDropDown.configure(value=)
+            pointSelectionDropDown["menu"].delete(i)
+            pointSelectionCallVar.set(str(points.getPointByIndex(0)))
             break
 
-deletePointButton = Button(pointEntryFrame, text="Delete Selected Point", command=deletePoint)
-deletePointButton.pack()
+deletePointButton = Button(pointDeleteFrame, text="Delete Selected Point", command=deletePoint)
+deletePointButton.pack(side=RIGHT)
 
-pointEntryFrame.grid(row=0, column=4)
+##End Point Delete Button
+
+pointDeleteFrame.pack()
+
+##End Point Selection And Deletion Section
+##Begin Point Add Section
+
+pointAddFrame = Frame(pointFrame)
+
+pointAddTitle = Label(pointAddFrame,text="Add Point:", font=fontStyle)
+pointAddTitle.pack()
+
+pointAddXCallVar = DoubleVar()
+pointAddXCallVar.set(0) #TODO Change to a variable default value
+
+pointAddXSlider = sliderInFrame(root = pointAddFrame, title="X Value", min=0, max= 10, default=0, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), callVar=pointAddXCallVar)#FIXME What max?
+pointAddXSlider.makeSlider()
+pointAddXSlider.packSide(LEFT)
+
+pointAddYCallVar = DoubleVar()
+pointAddYCallVar.set(0) #TODO Change to a variable default value
+
+pointAddYSlider = sliderInFrame(root = pointAddFrame, title="Y Value", min=0, max= 10, default=0, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), callVar=pointAddYCallVar)#FIXME What max?
+pointAddYSlider.makeSlider()
+pointAddYSlider.packSide(RIGHT)
+
+##Begin Point Add Button
+
+def addPoint():
+    newPoint = (pointAddXCallVar.get(), pointAddYCallVar.get())
+    points.addPoint(newPoint)
+    equations.buildEquations(points)
+    pointSelectionCallVar.set(str(newPoint))
+    pointSelectionDropDown["menu"].delete(0, "end")
+    for p in points.getPointStringList():
+        pointSelectionDropDown["menu"].add_command(label=str(p), command = lambda pStr= p: pointSelectionCallVar.set(pStr))
+    pointSelectionCallVar.set(str(newPoint))
+
+addPointButton = Button(pointAddFrame, text="Add Specified Point", command=addPoint)
+addPointButton.pack()
+
+##End Point Add Button
+
+pointAddFrame.pack()
+
+##End Point Add Section
+
+pointFrame.grid(row=0, column=4)
 
 ##End Point Entry Section
 ##Begin Lam Calculation Section
@@ -403,11 +499,40 @@ lamFrame.grid(row=4, column=0)
 
 ##End Equation Labels
 ##Begin Plot Section
+##Begin Plotting Initialization
 
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
 plt.subplots_adjust(wspace=.5, hspace=.5)#Specifies the space between plots
 fig.set_size_inches(4, 4)
+
+##End Plotting Initialization
+##Begin Cobweb Section
+
+plotCobwebOn = BooleanVar()
+plotCobwebOn.set(False)
+
+plotCobwebButton = Checkbutton(root, text="Plot Cobweb", variable=plotCobwebOn, font=fontStyle)
+plotCobwebButton.grid(row=4, column=1)
+
+def plotCobweb():
+    cobwebIterations = 200
+    lineInitial = points.getPointByIndex(0)
+    lineFinal = points.getLastPoint()
+    ax1.plot([lineInitial[0],lineFinal[0]],[lineInitial[1],lineFinal[0]], linewidth=.7) #plot y=x line
+    x0 = x0CallVar.get()
+    a = x0
+    c = equations.getY(a)
+    ax1.plot([x0, x0], [0, c], linewidth=.5, color='black') #first lines 
+    ax1.plot([x0, c], [c, c], linewidth=.5, color='black')#second line
+    for _ in range(cobwebIterations):#loop that makes the rest of the cobweb lines
+        a = c
+        c = equations.getY(a)
+        ax1.plot([a, a], [a, c], linewidth=.5, color='black')
+        ax1.plot([a, c], [c, c], linewidth=.5, color='black')
+
+##End Cobweb Section
+
 
 def plotting(i):
     equations.buildEquations(points)
@@ -418,15 +543,14 @@ def plotting(i):
     ax1.set_title("Tent Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
     ax1.set_xlabel("X Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
     ax1.set_ylabel("Y Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
-    #ax1.set_xlim(0,1)
-    #ax1.set_ylim(0,1.5)
     ax1.grid(True)
     lamCallVar.set(calcLam(x0=x0CallVar.get()))
-    #eq1LabelCallVar.set(equation1.getString())
+    if plotCobwebOn.get() == True:
+        plotCobweb()
 
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, rowspan=4)
-ani = animation.FuncAnimation(fig, plotting, interval=100)
+ani = animation.FuncAnimation(fig, plotting, interval=500)
 ##End Plot Section
 
 root.mainloop()
