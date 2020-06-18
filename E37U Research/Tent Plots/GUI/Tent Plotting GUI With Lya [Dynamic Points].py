@@ -63,6 +63,7 @@ def binIni(binSize):
 ##End Bin Section
 
 root = tkinter.Tk()
+#root.geometry('1920x1080')
 root.title('Tent Plotting GUI')
 def on_closing():
     root.quit()
@@ -161,6 +162,22 @@ x0Slider = slider(title="X0 Slider", min=0, max=1, default=.5, fontStyle=fontSty
 x0Slider.makeSlider()
 
 ##End x0 Slider Section
+##Begin Logistic Curve Point Count Section
+
+numLogisticPointCallVar = IntVar()
+numLogisticPointCallVar.set(5)
+
+logisticOverrideOn= BooleanVar()
+logisticOverrideOn.set(False)
+logisticOverrideFrame = Frame(root)
+logisticOverrideButton = Checkbutton(logisticOverrideFrame, text="Override With Logistic Points", variable=logisticOverrideOn, font=fontStyle)
+logisticOverrideButton.pack(side=LEFT)
+numLogisticPointSlider = sliderInFrame(root=logisticOverrideFrame, title="Number of Points on the Logistic Curve", min=1, max=10, default=5, fontStyle=fontStyle, precision=1, callVar=numLogisticPointCallVar)
+numLogisticPointSlider.makeSlider()
+numLogisticPointSlider.packSide(RIGHT)
+logisticOverrideFrame.grid(row=2, column=4)
+
+##End Logistic Curve Point Count Section
 ##Begin Precision Slider Section
 
 def precisionChange(var, indx, mode):#Callback function for when precisionCallVar changes
@@ -172,14 +189,14 @@ def precisionChange(var, indx, mode):#Callback function for when precisionCallVa
 
 precisionCallVar.trace_add("write", precisionChange)#Tying the callback to the Variable
 
-sliderPrecisionSlider = slider(title="Slider Precision", min=2, max=10, default=precisionDefault, fontStyle=fontStyle, precision=1, row=2, column=4, callVar=precisionCallVar)
+sliderPrecisionSlider = slider(title="Slider Precision", min=2, max=10, default=precisionDefault, fontStyle=fontStyle, precision=1, row=3, column=4, callVar=precisionCallVar)
 sliderPrecisionSlider.makeSlider()
 precisionCallVar.set(precisionDefault)
 
 ##End Slider Precision Slider Section
 ##Begin Font Slider Section
 
-fontSlider = slider(title="Font Size", min=1, max=30, default=fontSizeDefault, fontStyle=fontStyle, precision=1, row=3, column=4, callVar=fontSizeCallVar)
+fontSlider = slider(title="Font Size", min=1, max=30, default=fontSizeDefault, fontStyle=fontStyle, precision=1, row=4, column=4, callVar=fontSizeCallVar)
 fontSlider.makeSlider()
 
 def fontChange(var, indx, mode):#Callback function for when fontSizeCallVar changes
@@ -487,17 +504,6 @@ lamLabel.pack()
 lamFrame.grid(row=4, column=0)
 
 ##End Lam Label
-##Begin Equation Labels
-
-#eq1LabelCallVar = StringVar()
-#eq1LabelFrame = Frame(root)
-#q1LabelTitle = Label(eq1LabelFrame, text="Equation 1:", font=fontStyle)
-#eq1LabelTitle.pack()
-#eq1Label = Label(eq1LabelFrame, textvariable=eq1LabelCallVar, font=fontStyle)
-#eq1Label.pack()
-#eq1LabelFrame.grid(row=4, column=1)
-
-##End Equation Labels
 ##Begin Plot Section
 ##Begin Plotting Initialization
 
