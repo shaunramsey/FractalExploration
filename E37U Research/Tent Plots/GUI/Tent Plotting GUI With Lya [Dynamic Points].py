@@ -154,14 +154,32 @@ def calcPrecision(input):#Converts integer range of precision (2-10 on the slide
     return float(temp + "1")
 
 ##End Precision Calculator Function
+##Begin Initial Variable Sliders
+
+iniVarFrame = Frame(root)
+
 ##Begin x0 Slider Section
 
 x0CallVar = DoubleVar()
 x0CallVar.set(.5)
-x0Slider = slider(title="X0 Slider", min=0, max=1, default=.5, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), row=1, column=4, callVar=x0CallVar)
+x0Slider = sliderInFrame(root=iniVarFrame, title="x0 Slider", min=0, max=1, default=.5, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), callVar=x0CallVar)
 x0Slider.makeSlider()
+x0Slider.packSide(LEFT)
 
 ##End x0 Slider Section
+##Begin r Slider Section
+
+rCallVar = DoubleVar()
+rCallVar.set(3)
+rSlider = sliderInFrame(root=iniVarFrame, title="r Slider", min=0, max=4, default = 3, fontStyle=fontStyle, precision=calcPrecision(precisionDefault), callVar=rCallVar)
+rSlider.makeSlider()
+rSlider.packSide(RIGHT)
+
+##End r Slider Section
+
+iniVarFrame.grid(row=1, column=4)
+
+##End Initial Variable Sliders
 ##Begin Logistic Curve Point Count Section
 
 numLogisticPointCallVar = IntVar()
@@ -172,7 +190,7 @@ logisticOverrideOn.set(False)
 logisticOverrideFrame = Frame(root)
 logisticOverrideButton = Checkbutton(logisticOverrideFrame, text="Override With Logistic Points", variable=logisticOverrideOn, font=fontStyle)
 logisticOverrideButton.pack(side=LEFT)
-numLogisticPointSlider = sliderInFrame(root=logisticOverrideFrame, title="Number of Points on the Logistic Curve", min=1, max=10, default=5, fontStyle=fontStyle, precision=1, callVar=numLogisticPointCallVar)
+numLogisticPointSlider = sliderInFrame(root=logisticOverrideFrame, title="Number of Points on the Logistic Curve", min=3, max=50, default=5, fontStyle=fontStyle, precision=1, callVar=numLogisticPointCallVar)
 numLogisticPointSlider.makeSlider()
 numLogisticPointSlider.packSide(RIGHT)
 logisticOverrideFrame.grid(row=2, column=4)
@@ -232,8 +250,16 @@ class pointRegister:
         if self.duplicateCheck(point) == False:
             self.pointList.append(point)
             self.listSort()
-            x0Slider.setRange(min=self.getPointByIndex(0)[0], max=self.getPointByIndex(self.getLength()-1)[0])
-            x0CallVar.set(self.getPointByIndex(0)[0])
+
+            x0Temp = x0CallVar.get()
+            if logisticOverrideOn.get() == False:
+                x0Slider.setRange(min=self.getPointByIndex(0)[0], max=self.getPointByIndex(self.getLength()-1)[0])
+                if self.isInRange(x0Temp) == False:
+                    x0CallVar.set(self.getLastPoint()[0])
+            else:
+                x0Slider.setRange(min=0, max=1)
+                if x0Temp < 0 or x0Temp > 1:
+                    x0CallVar.set(.5)
         else:
             print("Error, duplicate point") #TODO make this an error on the GUI
     
@@ -472,7 +498,7 @@ pointFrame.grid(row=0, column=4)
 ##End Point Entry Section
 ##Begin Lam Calculation Section
 
-def calcLam(x0):
+def calcLam(x0, equations):
     x = x0
     sum = 0
     initialLoopCount = 100
@@ -521,11 +547,11 @@ plotCobwebOn.set(False)
 plotCobwebButton = Checkbutton(root, text="Plot Cobweb", variable=plotCobwebOn, font=fontStyle)
 plotCobwebButton.grid(row=4, column=1)
 
-def plotCobweb():
+def plotCobweb(points, equations):
     cobwebIterations = 200
-    lineInitial = points.getPointByIndex(0)
-    lineFinal = points.getLastPoint()
-    ax1.plot([lineInitial[0],lineFinal[0]],[lineInitial[1],lineFinal[0]], linewidth=.7) #plot y=x line
+    #lineInitial = points.getPointByIndex(0)
+    #lineFinal = points.getLastPoint()
+    #ax1.plot([lineInitial[0],lineFinal[0]],[lineInitial[1],lineFinal[0]], linewidth=.7) #plot y=x line
     x0 = x0CallVar.get()
     a = x0
     c = equations.getY(a)
@@ -538,21 +564,68 @@ def plotCobweb():
         ax1.plot([a, c], [c, c], linewidth=.5, color='black')
 
 ##End Cobweb Section
+##Begin Logistic Section
+
+def calcLogistic(r, x):
+    return abs(r*x*(1-x))
+
+def iniLogisticPoints(numPoints, r):
+    tempPoints = pointRegister()
+    space = (1/(numPoints-1))
+    for i in range(numPoints):
+        x = (space * i)
+        y = calcLogistic(r, x)
+        #print((x,y))
+        tempPoints.addPoint((x, y))
+    return tempPoints
+
+##Begin Logistic Plotting Section
+
+def plotLogistic():
+    r = rCallVar.get()
+    numPoints = numLogisticPointCallVar.get()
+    #numPoints = 5
+    xs = np.arange(0,1,.001) #x for parabala plot
+    ys =(r * xs * (1-xs)) #y for parabala plot
+    ax1.plot(xs, ys, linewidth=.7) #parabala plot
+
+    logisticPoints = iniLogisticPoints(numPoints, r)
+    logisticEquations = equationRegister()
+    logisticEquations.buildEquations(logisticPoints)
+    
+    for i in range(numPoints-1):
+        #print(i)
+        initial = logisticPoints.getPointByIndex(i)
+        final = logisticPoints.getPointByIndex(i+1)
+        #print((initial[0], final[0]), (initial[1], final[1]))
+        ax1.plot([initial[0], final[0]], [initial[1], final[1]])
+    if plotCobwebOn.get() == True:
+            plotCobweb(logisticPoints, logisticEquations)
+    lamCallVar.set(calcLam(x0=x0CallVar.get(), equations=logisticEquations))
+
+##End Logistic Plotting Section
+##End Logistic Section
 
 
 def plotting(i):
-    equations.buildEquations(points)
     ax1.clear()
-    for i in range(equations.getLength()):
-        line = equations.getPointsByIndex(i)
-        ax1.plot([line[0][0], line[1][0]],[line[0][1], line[1][1]], linewidth=1)
-    ax1.set_title("Tent Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
+    if logisticOverrideOn.get() == False:
+        ax1.set_title("Tent Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
+        equations.buildEquations(points)
+        for i in range(equations.getLength()):
+            line = equations.getPointsByIndex(i)
+            ax1.plot([line[0][0], line[1][0]],[line[0][1], line[1][1]], linewidth=1)
+        lamCallVar.set(calcLam(x0=x0CallVar.get(), equations=equations))
+        if plotCobwebOn.get() == True:
+            plotCobweb(points, equations)
+        
+    else:
+        ax1.set_title("Logistic Equation Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
+        plotLogistic()
+
     ax1.set_xlabel("X Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
     ax1.set_ylabel("Y Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
     ax1.grid(True)
-    lamCallVar.set(calcLam(x0=x0CallVar.get()))
-    if plotCobwebOn.get() == True:
-        plotCobweb()
 
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, rowspan=4)
