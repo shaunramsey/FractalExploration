@@ -51,12 +51,23 @@ class bin:
 ##End Bin Class Section
 ##Begin Bin Initialization Section
 
-def binIni(binSize):
+def binCalc(numBins, equations):
     binList = []
-    for i in range(0, int(1/binSize)):
-        #print(int(1/binSize))
-        binList.append(bin(start=(i*binSize), end=((i*binSize)+binSize)))
-        #print("Start= " + str(i*binSize)+ ", End= " + str((i*binSize)+binSize))
+    binSize = 1/numBins
+    for i in range(numBins):
+        binList.append(bin(start=(i*binSize), end=((i*binSize)+binSize)))   
+    
+    for i in range(numBins): #Loop to populate bins in binList with approperate contents
+        yStart = equations.getY(i * binSize)
+        yEnd = equations.getY((i+1) * binSize)
+        contentTotal = 0
+        for j in range(len(binList)):
+            tempPercentage = binList[j].percentageOfRange(rangeStart = yStart, rangeEnd = yEnd)
+            binList[j].addContent(tempPercentage)
+            contentTotal = contentTotal + tempPercentage
+            if contentTotal >= 1:
+                break
+
     return binList
         
 ##End Bin Initialization Section
@@ -187,13 +198,24 @@ numLogisticPointCallVar.set(5)
 
 logisticOverrideOn= BooleanVar()
 logisticOverrideOn.set(False)
-logisticOverrideFrame = Frame(root)
+logisticFrame = Frame(root, borderwidth=1, highlightbackground="black", highlightthickness=1)
+logisticOverrideFrame = Frame(logisticFrame)
+
 logisticOverrideButton = Checkbutton(logisticOverrideFrame, text="Override With Logistic Points", variable=logisticOverrideOn, font=fontStyle)
 logisticOverrideButton.pack(side=LEFT)
-numLogisticPointSlider = sliderInFrame(root=logisticOverrideFrame, title="Number of Points on the Logistic Curve", min=3, max=50, default=5, fontStyle=fontStyle, precision=1, callVar=numLogisticPointCallVar)
+
+numLogisticPointSlider = sliderInFrame(root=logisticOverrideFrame, title="Points On The Logistic Curve", min=3, max=50, default=5, fontStyle=fontStyle, precision=1, callVar=numLogisticPointCallVar)
 numLogisticPointSlider.makeSlider()
 numLogisticPointSlider.packSide(RIGHT)
-logisticOverrideFrame.grid(row=2, column=4)
+
+logisticOverrideFrame.pack()
+
+binNumCallVar = IntVar()
+binNumSlider = sliderInFrame(root=logisticFrame, title="Number of Bins", min=1, max=50, default=2, fontStyle=fontStyle, precision=1, callVar=binNumCallVar)
+binNumSlider.makeSlider()
+binNumSlider.pack()
+
+logisticFrame.grid(row=2, column=4)
 
 ##End Logistic Curve Point Count Section
 ##Begin Precision Slider Section
@@ -351,6 +373,9 @@ class equationRegister:
 
         def getFinalPoint(self):
             return self.finalPoint
+
+        def getWidth(self):
+            return (self.getFinalPoint()[0]-self.getInitialPoint()[0])
     
     def listSort(self):
         self.equationList.sort(key = lambda equation: equation.initialPoint[0])
@@ -393,15 +418,19 @@ class equationRegister:
 
     def getLength(self):
         return len(self.equationList)
+    
+    def getEQByIndex(self, index):
+        try:
+            return self.equationList[index]
+        except:
+            print("Error: indext out of range")
 
 ##End Points and Equations Classes
 
 points = pointRegister()
 points.addPoint((0,0))
 points.addPoint((.5,1))
-points.addPoint((1,0))
-points.addPoint((2,3))
-points.addPoint((5,0))
+points.addPoint((1,.25))
 
 equations = equationRegister()
 equations.buildEquations(points)
@@ -409,7 +438,7 @@ equations.buildEquations(points)
 ##End Points and Equations Section
 ##Begin Point Entry Section
 
-pointFrame = Frame(root)
+pointFrame = Frame(root, borderwidth=1, highlightbackground="black", highlightthickness=1)
 
 ##Begin Point Selection And Deletion Section
 
@@ -533,10 +562,10 @@ lamFrame.grid(row=4, column=0)
 ##Begin Plot Section
 ##Begin Plotting Initialization
 
-fig = plt.figure()
+fig = plt.figure(dpi=figureDPI)
 ax1 = fig.add_subplot(111)
-plt.subplots_adjust(wspace=.5, hspace=.5)#Specifies the space between plots
-fig.set_size_inches(4, 4)
+#plt.subplots_adjust(wspace=.5, hspace=.5)#Specifies the space between plots
+#fig.set_size_inches(3, 3)
 
 ##End Plotting Initialization
 ##Begin Cobweb Section
@@ -565,6 +594,36 @@ def plotCobweb(points, equations):
 
 ##End Cobweb Section
 ##Begin Logistic Section
+
+def calcLamLogistic(equations):
+    numBins = binNumCallVar.get()
+    bins = binCalc(numBins, equations)
+
+    weightList = []
+
+    l1width = equations.getEQByIndex(0).getLength()
+    l2width = equations.getEQByIndex(1).getLength()
+
+    l2ix = equations.getEQByIndex(1).getInitialPoint()[0] #.5
+    l2fx = equations.getEQByIndex(1).getFinalPoint()[0] #1
+    
+    #temp = 1/((((fx - equations.getEQByIndex(1).getX(ix))/ix) /ix)+ix)
+    temp = (((fx - equations.getEQByIndex(1).getX(ix))/ix)/ix)
+    print("temp " + str(temp))
+
+    for i in range(equations.getLength()):
+        #tempWeight = 0
+        tempWeight = i #FIXME put in the weight calculations for each one
+        #TODO magic with weights
+        weightList.append(tempWeight)
+
+    tempLambda = 0
+
+    for i in range(equations.getLength()):
+        tempLambda = tempLambda + (equations.getEQByIndex(i).getWidth() * weightList[i] * np.log(np.abs(equations.getEQByIndex(i).getM())))
+
+    return tempLambda
+
 
 def calcLogistic(r, x):
     return abs(r*x*(1-x))
@@ -601,7 +660,7 @@ def plotLogistic():
         ax1.plot([initial[0], final[0]], [initial[1], final[1]])
     if plotCobwebOn.get() == True:
             plotCobweb(logisticPoints, logisticEquations)
-    lamCallVar.set(calcLam(x0=x0CallVar.get(), equations=logisticEquations))
+    lamCallVar.set(calcLamLogistic(equations=equations))
 
 ##End Logistic Plotting Section
 ##End Logistic Section
@@ -616,6 +675,7 @@ def plotting(i):
             line = equations.getPointsByIndex(i)
             ax1.plot([line[0][0], line[1][0]],[line[0][1], line[1][1]], linewidth=1)
         lamCallVar.set(calcLam(x0=x0CallVar.get(), equations=equations))
+        print(calcLamLogistic(equations=equations))
         if plotCobwebOn.get() == True:
             plotCobweb(points, equations)
         

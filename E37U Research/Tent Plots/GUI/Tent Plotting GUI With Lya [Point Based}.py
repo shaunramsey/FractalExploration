@@ -470,10 +470,10 @@ eq2LabelFrame.grid(row=4, column=2)
 ##End Equation Labels
 ##Begin Plot Section
 
-fig = plt.figure()
+fig = plt.figure(dpi=figureDPI)
 ax1 = fig.add_subplot(111)
 plt.subplots_adjust(wspace=.5, hspace=.5)#Specifies the space between plots
-fig.set_size_inches(4, 4)
+#fig.set_size_inches(4, 4)
 
 def plotting(i):
     ax1.clear()
