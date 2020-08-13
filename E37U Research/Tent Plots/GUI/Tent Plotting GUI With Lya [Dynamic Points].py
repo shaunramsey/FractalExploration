@@ -379,7 +379,8 @@ class equationRegister:
 
     def getY(self,x):
         if x is None:
-            print("hey!")
+            print("Error: Cobweb Plot can't calculate with given paramiters. Correct for 'tent' plot like format")
+            return
         for i in range(self.getLength()):
             if self.isXInEQRange(x, self.equationList[i]) == True:
                 return self.equationList[i].getY(x)
@@ -435,13 +436,16 @@ pointDropdownFrame.pack(side=LEFT)
 ##Begin Point Delete Button
 
 def deletePoint():
-    for i in range(points.getLength()):
-        if pointSelectionCallVar.get() == str(points.getPointByIndex(i)):
-            points.removePointByIndex(i)
-            equations.buildEquations(points)
-            pointSelectionDropDown["menu"].delete(i)
-            pointSelectionCallVar.set(str(points.getPointByIndex(0)))
-            break
+    if points.getLength() > 2:
+        for i in range(points.getLength()):
+            if pointSelectionCallVar.get() == str(points.getPointByIndex(i)):
+                points.removePointByIndex(i)
+                equations.buildEquations(points)
+                pointSelectionDropDown["menu"].delete(i)
+                pointSelectionCallVar.set(str(points.getPointByIndex(0)))
+                break
+    else:
+        print("Error: Can't Have Less Than One Point")
 
 deletePointButton = Button(pointDeleteFrame, text="Delete Selected Point", command=deletePoint)
 deletePointButton.pack(side=RIGHT)
@@ -498,30 +502,128 @@ pointFrame.grid(row=0, column=4)
 ##End Point Entry Section
 ##Begin Lam Calculation Section
 
-def calcLam(x0, equations):
-    x = x0
-    sum = 0
-    initialLoopCount = 100
-    postLoopCount = 100
-    totalLoopCount = initialLoopCount + postLoopCount
-    lam = 0
-    #print("eq1: " + teq1.getString())
-    #print("eq2: " + teq2.getString())
-    for _ in range(initialLoopCount):
-        #print("I: " + str(i) + " X: " + str(x))
-        x = equations.getY(x)
-    for _ in range(initialLoopCount, totalLoopCount):
-        m = equations.getSlope(x)
-        f=np.log(np.abs(m))
-        x = equations.getY(x)
-        sum = sum + f
-    lam = sum / postLoopCount
-    return lam
+def find_overlap(i1, i2): #find the interval overlap of i2 onto i1
+    #print("find_overlap:" , i1, i2) 
+    overlap = [None,None]
+    if i2[1] <= i1[0] or i2[0] >= i1[1]: # no overlap
+        return [0,0] #should be read as no overlap
+    if i2[0] <= i1[0] and i2[1] >= i1[0]:
+        overlap[0] = i1[0]
+    else:
+        overlap[0] = i2[0]
+    if i2[1] >= i1[1] and i2[0] <= i1[1]:
+        overlap[1] = i1[1]
+    else:
+        overlap[1] = i2[1] 
+    return overlap
+
+def calcLam(internalPoints): #FIXME still an issue when a line segment has a slope of 0
+    #points = [ (0,0), (.5,1), (1,0), (2,3), (5, 0) ]  # points from default tent plot gui
+    matrix = []
+
+    line_segment_x_intervals = []
+    line_segment_y_intervals = []
+    line_segment_x_proportions = []
+    line_segment_slopes = []
+    eqn_n = ""
+    matrix_n = []
+    n = len(internalPoints.getPointList()) #number of points
+    total_x_interval = internalPoints.getPointList()[n-1][0] - internalPoints.getPointList()[0][0]  # total x _interval
+
+    last_point = (0,0)
+    for i,p in enumerate(internalPoints.getPointList()):
+        if i == 0:
+            last_point = p
+            continue #skip the first point, line segments start at the second
+        line_segment_x_intervals.append([last_point[0], p[0]])
+        if p[1] > last_point[1]:
+            line_segment_y_intervals.append([last_point[1], p[1]])
+        else:
+            line_segment_y_intervals.append([p[1], last_point[1]])
+        line_segment_x_proportions.append( (p[0] - last_point[0]) / total_x_interval)
+        line_segment_slopes.append( (p[1] - last_point[1]) / (p[0] - last_point[0]) )
+        eqn_n = eqn_n + str(line_segment_x_proportions[i-1]) + "*w_" + str(i) + " + "
+        matrix_n.append(line_segment_x_proportions[i-1])
+        last_point = p
+    matrix.append(matrix_n)
+
+
+
+    eqn_n = eqn_n[:-2] + " = 1.0"
+    #print("     slopes:", line_segment_slopes)
+    #print("x intervals:", line_segment_x_intervals)
+    #print("x proportin:", line_segment_x_proportions)
+    #print("y intervals:", line_segment_y_intervals)
+
+
+    #print("--------------------------------")
+
+
+    #Test for slope of 0
+    for i in line_segment_slopes:
+        if i == 0:
+            return "Error: 0 slope line"
+
+    this_eqn = ""
+    this_arr = []
+    for i, line_x in enumerate(line_segment_x_intervals):
+        if i != 0:
+            matrix.append(this_arr)
+            #print(this_eqn)
+        this_eqn = "w" + str(i+1) + " = "
+        this_arr = []
+        for j, line_y in enumerate(line_segment_y_intervals):
+            overlap = find_overlap(line_x, line_y)
+            weighted = (overlap[1] - overlap[0]) / (line_y[1] - line_y[0])
+            this_eqn = this_eqn + str(weighted) + " * w" + str(j+1) + " + "
+            if i == j:
+                this_arr.append(weighted-1)
+            else:
+                this_arr.append(weighted)
+        this_eqn = this_eqn[:-3]
+    #there is a third hidden equation
+    #print(" --- unneeded/redundant: ", this_eqn[:-3])
+    #print("eqn n: ", eqn_n)
+    #print("---")
+    ans_array = [1]
+    for i in range(n-2): # we need one less than the linesegments which is one less than the num points
+        ans_array.append(0)
+    ans = np.array(ans_array)
+    #print("  matrix: ", matrix)
+    #print("     ans: ", ans)
+    solution = np.linalg.solve(matrix,ans)
+    #print("solution:",solution)
+
+    lyap = 0
+    for i, prop in enumerate(line_segment_x_proportions):
+        lyap = lyap + prop * solution[i] * np.log(abs(line_segment_slopes[i]))
+
+    return lyap
+
+#def calcLamLogistic(x0, equations):
+#    x = x0
+#    sum = 0
+#    initialLoopCount = 100
+#    postLoopCount = 100
+#    totalLoopCount = initialLoopCount + postLoopCount
+#    lam = 0
+#    #print("eq1: " + teq1.getString())
+#    #print("eq2: " + teq2.getString())
+#    for _ in range(initialLoopCount):
+#        #print("I: " + str(i) + " X: " + str(x))
+#        x = equations.getY(x)
+#    for _ in range(initialLoopCount, totalLoopCount):
+#        m = equations.getSlope(x)
+#        f=np.log(np.abs(m))
+#        x = equations.getY(x)
+#        sum = sum + f
+#    lam = sum / postLoopCount
+#    return lam
 
 ##End Lam Calculation Section
 ##Begin Lam Label
 
-lamCallVar = DoubleVar()
+lamCallVar = StringVar() #This was changed to a StringVar to enable error messages
 lamFrame = Frame(root)
 lamLabelTitle = Label(lamFrame, text="Lyapunov Exponent:", font=fontStyle)
 lamLabelTitle.pack()
@@ -601,7 +703,7 @@ def plotLogistic():
         ax1.plot([initial[0], final[0]], [initial[1], final[1]])
     if plotCobwebOn.get() == True:
             plotCobweb(logisticPoints, logisticEquations)
-    lamCallVar.set(calcLam(x0=x0CallVar.get(), equations=logisticEquations))
+    lamCallVar.set(calcLam(logisticPoints))
 
 ##End Logistic Plotting Section
 ##End Logistic Section
@@ -615,7 +717,8 @@ def plotting(i):
         for i in range(equations.getLength()):
             line = equations.getPointsByIndex(i)
             ax1.plot([line[0][0], line[1][0]],[line[0][1], line[1][1]], linewidth=1)
-        lamCallVar.set(calcLam(x0=x0CallVar.get(), equations=equations))
+        #lamCallVar.set(calcLam(x0=x0CallVar.get(), equations=equations))
+        lamCallVar.set(calcLam(points))
         if plotCobwebOn.get() == True:
             plotCobweb(points, equations)
         
