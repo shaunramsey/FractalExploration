@@ -1,4 +1,4 @@
-binSize = .25
+binSize = .5
 
 class bin:
     def __init__(self, **kwargs):
@@ -104,13 +104,14 @@ def binIni(binSize):
     return binList
 
 binsForDayz = binIni(binSize)
-bigEquation = tentEquation(equation0=equation(m=2), equation1=equation(m=-2, b=2), alpha=.5)
+bigEquation = tentEquation(equation0=equation(m=2), equation1=equation(m=-1.5, b=1.75), alpha=.5)
 
 def printBIN():
     for i in range(len(binsForDayz)):
         print (str(binsForDayz[i].getID()) + ", Content: " + str(binsForDayz[i].getContent()))
 
 for i in range(int(1/binSize)):
+    
     yStart = bigEquation.getY(i * binSize)
     yEnd = bigEquation.getY((i+1) * binSize)
     print("I: " +str(i))
@@ -124,8 +125,9 @@ for i in range(int(1/binSize)):
         contentTotal = contentTotal + tempPercentage
         if contentTotal >= 1:
             break
-    #printBIN()
-
+    printBIN()
+print(bigEquation.equation0.getString())
+print(bigEquation.equation1.getString())
 #print(str(bigEquation.getM()))
 #print(str(bigEquation.getB()))
 #print("Length of list: "+ str(len(binsForDayz)))
