@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-rResolution = 5000 #number of r's tested
+rResolution = 500 #number of r's tested
 rMax = 4 #maximum r
 initialLoopCount = 100 #number of iterations before starting list
 initialPoint = 0.5 #initial starting point for iterations
@@ -24,7 +24,7 @@ def bifurcationPoint(r,initialLoopCount, initialPoint, postLoopCount):
         if foundGroup == True:
             break
         tempList.append(tempPointPost)
-    print(r, foundGroup, len(tempList))
+    #print(r, foundGroup, len(tempList))
     return tempList
     
 rInterval = (rMax-1)/rResolution

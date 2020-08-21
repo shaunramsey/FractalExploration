@@ -8,6 +8,7 @@ import time
 import matplotlib.animation as animation
 import math
 
+
 ##Begin Default Values
 
 precisionDefault = 2
@@ -203,8 +204,7 @@ logisticOverrideFrame = Frame(logisticFrame)
 
 logisticOverrideButton = Checkbutton(logisticOverrideFrame, text="Override With Logistic Points", variable=logisticOverrideOn, font=fontStyle)
 logisticOverrideButton.pack(side=LEFT)
-
-numLogisticPointSlider = sliderInFrame(root=logisticOverrideFrame, title="Points On The Logistic Curve", min=3, max=50, default=5, fontStyle=fontStyle, precision=1, callVar=numLogisticPointCallVar)
+numLogisticPointSlider = sliderInFrame(root=logisticOverrideFrame, title="Number of Points on the Logistic Curve", min=3, max=500, default=5, fontStyle=fontStyle, precision=1, callVar=numLogisticPointCallVar)
 numLogisticPointSlider.makeSlider()
 numLogisticPointSlider.packSide(RIGHT)
 
@@ -218,38 +218,6 @@ binNumSlider.pack()
 logisticFrame.grid(row=2, column=4)
 
 ##End Logistic Curve Point Count Section
-##Begin Precision Slider Section
-
-def precisionChange(var, indx, mode):#Callback function for when precisionCallVar changes
-    precision = calcPrecision(precisionCallVar.get())
-    x0Slider.setPrecision(resolution=precision)
-    #pointAddXSlider.setPrecision(resolution=precision) #FIXME
-    #pointAddYSlider.setPrecision(resolution=precision) #FIXME
-
-
-precisionCallVar.trace_add("write", precisionChange)#Tying the callback to the Variable
-
-sliderPrecisionSlider = slider(title="Slider Precision", min=2, max=10, default=precisionDefault, fontStyle=fontStyle, precision=1, row=3, column=4, callVar=precisionCallVar)
-sliderPrecisionSlider.makeSlider()
-precisionCallVar.set(precisionDefault)
-
-##End Slider Precision Slider Section
-##Begin Font Slider Section
-
-fontSlider = slider(title="Font Size", min=1, max=30, default=fontSizeDefault, fontStyle=fontStyle, precision=1, row=4, column=4, callVar=fontSizeCallVar)
-fontSlider.makeSlider()
-
-def fontChange(var, indx, mode):#Callback function for when fontSizeCallVar changes
-    fontStyle.configure(size=fontSizeCallVar.get())
-    fontSlider.setFontStyle(fontStyle=fontStyle)
-    x0Slider.setFontStyle(fontStyle=fontStyle)
-    #pointAddXSlider.setFontStyle(fontStyle=fontStyle) #FIXME
-    #pointAddYSlider.setFontStyle(fontStyle=fontStyle) #FIXME
-    sliderPrecisionSlider.setFontStyle(fontStyle=fontStyle)
-
-fontSizeCallVar.trace_add("write", fontChange)#Tying the callback to the Variable
-
-##End Font Slider Section
 ##End Slider Section
 ##Begin Points and Equations Section
 ##Begin Points and Equations Classes
@@ -327,6 +295,9 @@ class pointRegister:
         if x >= self.getPointByIndex(0)[0] and x <= self.getLastPoint()[0]:
             return True
         return False
+    
+    def getXRange(self):
+        return [self.getPointByIndex(0)[0], self.getLastPoint()[0]]
 
 class equationRegister:
     def __init__(self):
@@ -334,8 +305,15 @@ class equationRegister:
     
     class equation:
         def __init__(self, initialPoint, finalPoint):
-            self.initialPoint = initialPoint
-            self.finalPoint = finalPoint
+            if initialPoint == None:
+                self.initialPoint = 0
+            else:
+                self.initialPoint = initialPoint
+            
+            if finalPoint == None:
+                self.finalPoint = 0
+            else:
+                self.finalPoint = finalPoint
 
             self.m = 0
             self.b = 0
@@ -404,7 +382,8 @@ class equationRegister:
 
     def getY(self,x):
         if x is None:
-            print("hey!")
+            print("Error: Cobweb Plot can't calculate with given paramiters. Correct for 'tent' plot like format")
+            return
         for i in range(self.getLength()):
             if self.isXInEQRange(x, self.equationList[i]) == True:
                 return self.equationList[i].getY(x)
@@ -430,7 +409,10 @@ class equationRegister:
 points = pointRegister()
 points.addPoint((0,0))
 points.addPoint((.5,1))
-points.addPoint((1,.25))
+points.addPoint((1,0))
+points.addPoint((2,3))
+points.addPoint((5,0))
+x0CallVar.set(.5) #Added because initializing the points sets x0 back to 0 when it should default at .5
 
 equations = equationRegister()
 equations.buildEquations(points)
@@ -464,13 +446,16 @@ pointDropdownFrame.pack(side=LEFT)
 ##Begin Point Delete Button
 
 def deletePoint():
-    for i in range(points.getLength()):
-        if pointSelectionCallVar.get() == str(points.getPointByIndex(i)):
-            points.removePointByIndex(i)
-            equations.buildEquations(points)
-            pointSelectionDropDown["menu"].delete(i)
-            pointSelectionCallVar.set(str(points.getPointByIndex(0)))
-            break
+    if points.getLength() > 2:
+        for i in range(points.getLength()):
+            if pointSelectionCallVar.get() == str(points.getPointByIndex(i)):
+                points.removePointByIndex(i)
+                equations.buildEquations(points)
+                pointSelectionDropDown["menu"].delete(i)
+                pointSelectionCallVar.set(str(points.getPointByIndex(0)))
+                break
+    else:
+        print("Error: Can't Have Less Than One Point")
 
 deletePointButton = Button(pointDeleteFrame, text="Delete Selected Point", command=deletePoint)
 deletePointButton.pack(side=RIGHT)
@@ -525,17 +510,189 @@ pointAddFrame.pack()
 pointFrame.grid(row=0, column=4)
 
 ##End Point Entry Section
+##Begin Slider Section 2
+
+##Begin Precision Slider Section
+
+def precisionChange(var, indx, mode):#Callback function for when precisionCallVar changes
+    precision = calcPrecision(precisionCallVar.get())
+    x0Slider.setPrecision(resolution=precision)
+    rSlider.setPrecision(resolution=precision)
+    pointAddXSlider.setPrecision(resolution=precision)
+    pointAddYSlider.setPrecision(resolution=precision)
+
+
+precisionCallVar.trace_add("write", precisionChange)#Tying the callback to the Variable
+
+sliderPrecisionSlider = slider(title="Slider Precision", min=2, max=10, default=precisionDefault, fontStyle=fontStyle, precision=1, row=3, column=4, callVar=precisionCallVar)
+sliderPrecisionSlider.makeSlider()
+precisionCallVar.set(precisionDefault)
+
+##End Slider Precision Slider Section
+##Begin Font Slider Section
+
+fontSlider = slider(title="Font Size", min=1, max=30, default=fontSizeDefault, fontStyle=fontStyle, precision=1, row=4, column=4, callVar=fontSizeCallVar)
+fontSlider.makeSlider()
+
+def fontChange(var, indx, mode):#Callback function for when fontSizeCallVar changes
+    fontStyle.configure(size=fontSizeCallVar.get())
+    fontSlider.setFontStyle(fontStyle=fontStyle)
+    x0Slider.setFontStyle(fontStyle=fontStyle)
+    rSlider.setFontStyle(fontStyle=fontStyle)
+    pointAddXSlider.setFontStyle(fontStyle=fontStyle)
+    pointAddYSlider.setFontStyle(fontStyle=fontStyle)
+    sliderPrecisionSlider.setFontStyle(fontStyle=fontStyle)
+
+fontSizeCallVar.trace_add("write", fontChange)#Tying the callback to the Variable
+
+##End Font Slider Section
+
+##End Slide Section 2
+##Begin Time Label Section
+
+calcTimeCallVar = StringVar()
+calcTimeFrame = Frame(root)
+calcTimeLabelTitle = Label(calcTimeFrame, text="Lyapunov Calculation Time:", font=fontStyle)
+calcTimeLabelTitle.pack()
+calcTimeLabel = Label(calcTimeFrame, textvariable=calcTimeCallVar, font=fontStyle)
+calcTimeLabel.pack()
+calcTimeFrame.grid(row=5, column=0)
+
+iterCalcTimeCallVar = StringVar()
+iterCalcTimeFrame = Frame(root)
+iterCalcTimeLabelTitle = Label(iterCalcTimeFrame, text="Iterative Lyapunov Calculation Time:", font=fontStyle)
+iterCalcTimeLabelTitle.pack()
+iterCalcTimeLabel = Label(iterCalcTimeFrame, textvariable=iterCalcTimeCallVar, font=fontStyle)
+iterCalcTimeLabel.pack()
+iterCalcTimeFrame.grid(row=5, column=1)
+
+
+##End Time Label Section
 ##Begin Lam Calculation Section
 
-def calcLam(x0, equations):
+def find_overlap(i1, i2): #find the interval overlap of i2 onto i1
+    #print("find_overlap:" , i1, i2) 
+    overlap = [None,None]
+    if i2[1] <= i1[0] or i2[0] >= i1[1]: # no overlap
+        return [0,0] #should be read as no overlap
+    if i2[0] <= i1[0] and i2[1] >= i1[0]:
+        overlap[0] = i1[0]
+    else:
+        overlap[0] = i2[0]
+    if i2[1] >= i1[1] and i2[0] <= i1[1]:
+        overlap[1] = i1[1]
+    else:
+        overlap[1] = i2[1] 
+    return overlap
+
+def calcLam(internalPoints):
+    startTime = time.time()
+    #points = [ (0,0), (.5,1), (1,0), (2,3), (5, 0) ]  # points from default tent plot gui
+    matrix = []
+
+    line_segment_x_intervals = []
+    line_segment_y_intervals = []
+    line_segment_x_proportions = []
+    line_segment_slopes = []
+    eqn_n = ""
+    matrix_n = []
+    n = len(internalPoints.getPointList()) #number of points
+    total_x_interval = internalPoints.getPointList()[n-1][0] - internalPoints.getPointList()[0][0]  # total x _interval
+
+    last_point = (0,0)
+    for i,p in enumerate(internalPoints.getPointList()):
+        if i == 0:
+            last_point = p
+            continue #skip the first point, line segments start at the second
+        line_segment_x_intervals.append([last_point[0], p[0]])
+        if p[1] > last_point[1]:
+            line_segment_y_intervals.append([last_point[1], p[1]])
+        else:
+            line_segment_y_intervals.append([p[1], last_point[1]])
+        line_segment_x_proportions.append( (p[0] - last_point[0]) / total_x_interval)
+        line_segment_slopes.append( (p[1] - last_point[1]) / (p[0] - last_point[0]) )
+        eqn_n = eqn_n + str(line_segment_x_proportions[i-1]) + "*w_" + str(i) + " + "
+        matrix_n.append(line_segment_x_proportions[i-1])
+        last_point = p
+    matrix.append(matrix_n)
+
+
+
+    eqn_n = eqn_n[:-2] + " = 1.0"
+    #print("     slopes:", line_segment_slopes)
+    #print("x intervals:", line_segment_x_intervals)
+    #print("x proportion:", line_segment_x_proportions)
+    #print("y intervals:", line_segment_y_intervals)
+
+
+    #print("--------------------------------")
+
+
+    #Test for slope of 0
+    #print("hello")
+    #for i in line_segment_slopes:
+        #print(i)
+        #if eps > i and i > -eps:
+        #if 0.0001 > i > -0.0001:
+            #return "Error: 0 slope line"
+
+    this_eqn = ""
+    this_arr = []
+    for i, line_x in enumerate(line_segment_x_intervals):
+        if i != 0:
+            matrix.append(this_arr)
+            #print(this_eqn)
+        this_eqn = "w" + str(i+1) + " = "
+        this_arr = []
+        for j, line_y in enumerate(line_segment_y_intervals):
+            overlap = find_overlap(line_x, line_y)
+            if overlap[1] - overlap[0] == 0:
+                weighted = 0
+            elif line_y[1] - line_y[0] == 0:
+                weighted = 99999999
+            else:
+                weighted = (overlap[1] - overlap[0]) / (line_y[1] - line_y[0])
+            this_eqn = this_eqn + str(weighted) + " * w" + str(j+1) + " + "
+            if i == j:
+                this_arr.append(weighted-1)
+            else:
+                this_arr.append(weighted)
+        this_eqn = this_eqn[:-3]
+    #there is a third hidden equation
+    #print(" --- unneeded/redundant: ", this_eqn[:-3])
+    #print("eqn n: ", eqn_n)
+    #print("---")
+    ans_array = [1]
+    for i in range(n-2): # we need one less than the linesegments which is one less than the num points
+        ans_array.append(0)
+    ans = np.array(ans_array)
+    #print("  matrix: ", matrix)
+    #print("     ans: ", ans)
+    solution = np.linalg.solve(matrix,ans)
+    #print("solution:",solution)
+
+    lyap = 0
+    for i, prop in enumerate(line_segment_x_proportions):
+        lyap = lyap + prop * solution[i] * np.log(abs(line_segment_slopes[i]))
+
+    endTime = time.time()
+    tempTimeLab = str((endTime-startTime)*1000)[:7] + " ms"
+    print("calc " + tempTimeLab)
+    if tempTimeLab != "0.0 ms":
+        calcTimeCallVar.set(tempTimeLab)
+    elif calcTimeCallVar.get()[-5:] != "(Old)": 
+        calcTimeCallVar.set(calcTimeCallVar.get() + " (Old)")
+
+    return lyap
+
+def calcIterLam(x0, equations):
+    startTime = time.time()
     x = x0
     sum = 0
-    initialLoopCount = 100
-    postLoopCount = 100
+    initialLoopCount = 1000
+    postLoopCount = 1000
     totalLoopCount = initialLoopCount + postLoopCount
     lam = 0
-    #print("eq1: " + teq1.getString())
-    #print("eq2: " + teq2.getString())
     for _ in range(initialLoopCount):
         #print("I: " + str(i) + " X: " + str(x))
         x = equations.getY(x)
@@ -545,12 +702,20 @@ def calcLam(x0, equations):
         x = equations.getY(x)
         sum = sum + f
     lam = sum / postLoopCount
+    endTime = time.time()
+    tempTimeLab = str((endTime-startTime)*1000)[:7] + " ms"
+    print("calc iter " + tempTimeLab)
+    if tempTimeLab != "0.0 ms":
+        iterCalcTimeCallVar.set(tempTimeLab)
+    elif iterCalcTimeCallVar.get()[-5:] != "(Old)": 
+        iterCalcTimeCallVar.set(iterCalcTimeCallVar.get() + " (Old)")
+
     return lam
 
 ##End Lam Calculation Section
 ##Begin Lam Label
 
-lamCallVar = DoubleVar()
+lamCallVar = StringVar() #This was changed to a StringVar to enable error messages
 lamFrame = Frame(root)
 lamLabelTitle = Label(lamFrame, text="Lyapunov Exponent:", font=fontStyle)
 lamLabelTitle.pack()
@@ -559,6 +724,17 @@ lamLabel.pack()
 lamFrame.grid(row=4, column=0)
 
 ##End Lam Label
+##Begin Iterative Lam Label
+
+iterLamCallVar = StringVar() #This was changed to a StringVar to enable error messages
+iterLamFrame = Frame(root)
+iterLamLabelTitle = Label(iterLamFrame, text="Iterative Lyapunov Exponent:", font=fontStyle)
+iterLamLabelTitle.pack()
+iterLamLabel = Label(iterLamFrame, textvariable=iterLamCallVar, font=fontStyle)
+iterLamLabel.pack()
+iterLamFrame.grid(row=4, column=1)
+
+##End Iterative Lam Label
 ##Begin Plot Section
 ##Begin Plotting Initialization
 
@@ -574,7 +750,7 @@ plotCobwebOn = BooleanVar()
 plotCobwebOn.set(False)
 
 plotCobwebButton = Checkbutton(root, text="Plot Cobweb", variable=plotCobwebOn, font=fontStyle)
-plotCobwebButton.grid(row=4, column=1)
+plotCobwebButton.grid(row=4, column=2)
 
 def plotCobweb(points, equations):
     cobwebIterations = 200
@@ -660,7 +836,8 @@ def plotLogistic():
         ax1.plot([initial[0], final[0]], [initial[1], final[1]])
     if plotCobwebOn.get() == True:
             plotCobweb(logisticPoints, logisticEquations)
-    lamCallVar.set(calcLamLogistic(equations=equations))
+    lamCallVar.set(calcLam(logisticPoints))
+    iterLamCallVar.set(calcIterLam(x0=x0CallVar.get(), equations=logisticEquations))
 
 ##End Logistic Plotting Section
 ##End Logistic Section
@@ -674,10 +851,10 @@ def plotting(i):
         for i in range(equations.getLength()):
             line = equations.getPointsByIndex(i)
             ax1.plot([line[0][0], line[1][0]],[line[0][1], line[1][1]], linewidth=1)
-        lamCallVar.set(calcLam(x0=x0CallVar.get(), equations=equations))
-        print(calcLamLogistic(equations=equations))
         if plotCobwebOn.get() == True:
             plotCobweb(points, equations)
+        lamCallVar.set(calcLam(points))
+        iterLamCallVar.set(calcIterLam(x0=x0CallVar.get(), equations=equations))
         
     else:
         ax1.set_title("Logistic Equation Plot", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-8))
@@ -686,6 +863,7 @@ def plotting(i):
     ax1.set_xlabel("X Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
     ax1.set_ylabel("Y Values", fontname=fontStyle.actual("family"), fontsize=(fontStyle.actual("size")-10))
     ax1.grid(True)
+    #fig.savefig('C:/Users/Evan/Desktop/Research2020/Presentation/current_plot.png', dpi=500, bbox_inches='tight')
 
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().grid(row=0, column=0, columnspan=4, rowspan=4)
