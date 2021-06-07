@@ -13,24 +13,24 @@ num_lyap_iterations = 100      # number of iterations used to compute the lyapun
 steps = 500                     # steps between b1 and b2 values on axes -- higher it is, the better the picture
 
 # LOWER BOUND OF AREA OF INTEREST IN A TIME SCALE WITH THE SPECIFIED A VALUE
-@jit
+#@jit
 def L(a):
     return e_to_the_a + 1
 
 # UPPER BOUND OF AREA OF INTEREST IN A TIME SCALE WITH THE SPECIFIED A VALUE
-@jit
+#@jit
 def U(a):
     return ( np.sqrt(np.exp(2 * a) + (8 * e_to_the_a) ) + e_to_the_a + 2) / 2
 
 # DIFFERENCE OPERATOR -- MAP THAT GIVES US THE LEFT ENDPOINT OF THE NEXT CONTINUS TIME INTERVAL
-@jit
+#@jit
 def F(x, b):
     top = ( e_to_the_a * x ) * ( ( (e_to_the_a - 1) * x ) - (b * x) + b + 1 )
     bottom = ( ( e_to_the_a - 1 ) * x + 1 )**2
     return top/bottom
 
 # DERIVATIVE OF F -- USED TO COMPUTE THE LYAPUNOV EXPONENT
-@jit
+#@jit
 def Fprime(x, b):
      
      top = -1 * e_to_the_a * ( ( x * e_to_the_a + x - 1 ) * b - (x * e_to_the_a) + x - 1 )
@@ -38,7 +38,7 @@ def Fprime(x, b):
      return top/bottom
  
 # RETURNS THE CORRECT B-VALUE BASED ON THE CURRENT ITERATION
-@jit
+#@jit
 def getbval(curr_iteration, b1, b2):
     if (curr_iteration % (2 * n) < n):
         return b1
@@ -46,7 +46,7 @@ def getbval(curr_iteration, b1, b2):
         return b2
 
 # RETURNS THE LYAPUNOV EXPONENT BASED ON THE SPECIFIED B1 AND B2 VALUES
-@jit
+#@jit
 def getlyapexponent(time_scale):
     b1, b2 = time_scale
     
@@ -95,3 +95,4 @@ plt.title("a = " + str(a) + ", n = " + str(n))
 plt.xlabel("b1")
 plt.ylabel("b2")
 plt.imshow(fractal_grid, cmap = lyap_cmap, origin = "lower", vmax=0, extent = (lowerbound, upperbound, lowerbound, upperbound))
+plt.show()
