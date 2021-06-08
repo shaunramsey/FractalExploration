@@ -43,7 +43,8 @@ In this time, I figured you could shorten going through the cobwebbing process I
 
 I decided to come back to my idea of using the plot function. I found that by running the plot command many times with a series of x values coming from iterating the function over and over. After talking to Dr Ramsey about it I realized this relies on the assumption that these R values have sequential connection. When dealing with chaotic systems this can connection that seems like it is there can unfortunately break down. Right around r= 3.5 is an example of this where my plot generates a bar in between the points where it should not be, whilst the scatter plot does not. Dr Ramsey talked a little bit about how this problem can be overcome with hashing, and I will be working on that tomorrow.
 
-![image]
+![Scatter Bifurcation_diagram](EB Research/bifurcation_diagram.png)
+![EB Bifurcation_diagram](EB Research/bifurcation_diagram_eb.png)
 
 
 I also took some time today to familiarize myself with GitHub and being able to get my code and research logs backed up on to there. 
