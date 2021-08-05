@@ -1,0 +1,416 @@
+Timer unit: 1e-07 s
+
+Total time: 266.749 s
+File: C:\Users\ebott\Documents\GitHub\FractalExploration\EB Research\Linear Approx\invariant_fractal.py
+Function: lyapunov_fractal at line 78
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    78                                           def lyapunov_fractal(apprx_type = 'logistic', # determines which of the three kinds of approximations to use, linear, logistic, and invariant_linear
+    79                                                                n_iter = 120, # number of iterations used to compute the lyapunov exponents
+    80                                                                n_warmups = 1200, # number of warmup iterations
+    81                                                                a_lb = 2, a_ub = 4, # lower and upper bounds of the A axis
+    82                                                                b_lb = 2 , b_ub = 4, # lower and upper bounds of the B axis
+    83                                                                steps = 500, # the number of values between each upper and lower bound
+    84                                                                x_0 = 0.5, # starting value of x
+    85                                                                n_points = 5, # number of (internal) points used to construct a linear apprx
+    86                                                                savepng = False, # save a png of the fractal image
+    87                                                                savefile = False # save a binary file with the lyapunov data from the fractal
+    88                                                               ):
+    89                                               
+    90         1         40.0     40.0      0.0      @jit
+    91         1       4140.0   4140.0      0.0      def logisitc_derivative(x, r, epsilon = 0):
+    92                                                   return np.add(np.abs(np.multiply(r, (np.subtract(1, (np.multiply(2, x)))))), epsilon)
+    93                                               
+    94         1         28.0     28.0      0.0      @jit
+    95         1       2277.0   2277.0      0.0      def linear_derivative(x, function):
+    96                                                   return np.abs(function.slope(x))
+    97                                               
+    98                                           #     @jit
+    99         1         27.0     27.0      0.0      def iterative_lyapunov(n_warmups, n_iter, r_a, r_b, x_0):
+   100                                                   x = x_0
+   101                                                   lyapunov_ex = 0
+   102                                                   
+   103                                                   for i in range(n_warmups):
+   104                                                       if i % 2 == 0:
+   105                                                           x = np.multiply(x, r_a) * np.subtract(1,x) # multiplies every column a value of ra
+   106                                                       else :
+   107                                                           x = np.multiply(x, r_b) * np.subtract(1,x) # multiples every row by a value of rb
+   108                                           #                 x = np.multiply(x.T, rb).T * np.subtract(1,x)
+   109                                               
+   110                                                   for i in range(n_iter):
+   111                                                       if i % 2 == 0:
+   112                                                           x = np.multiply(x, r_a) * np.subtract(1,x)
+   113                                                           lyapunov_ex = np.add(lyapunov_ex , np.log(logisitc_derivative(x, r_a)))
+   114                                                       else:
+   115                                                           x = np.multiply(x, r_b) * np.subtract(1,x)
+   116                                           #                 x = np.multiply(x.T, rb).T * np.subtract(1,x)
+   117                                                           lyapunov_ex = np.add(lyapunov_ex , np.log(logisitc_derivative(x, r_b)))
+   118                                                           
+   119                                                   lyapunov_ex = np.divide(lyapunov_ex, n_iter)
+   120                                           
+   121                                                   return lyapunov_ex
+   122                                               
+   123                                               
+   124         1         22.0     22.0      0.0      @jit
+   125         1       2400.0   2400.0      0.0      def calc_equal_portion(n, total_x_interval):
+   126                                                   p = (1/n) * total_x_interval
+   127                                                   return p
+   128                                           
+   129                                               # returns the weight (the proportion) of x values of a function mapped by y values of another fuction   
+   130         1         25.0     25.0      0.0      @jit
+   131         1       2710.0   2710.0      0.0      def calc_weight(x_lb, x_ub, y_lb, y_ub):
+   132                                                   overlap_lb = max(x_lb,y_lb)
+   133                                                   overlap_ub = min(x_ub,y_ub)
+   134                                           
+   135                                                   if overlap_lb > overlap_ub:
+   136                                                       return 0
+   137                                                   else:
+   138                                                       w = (overlap_ub - overlap_lb) /(y_ub - y_lb)
+   139                                                   return w  
+   140                                           
+   141         1         40.0     40.0      0.0      start = time.time()
+   142                                           
+   143         1       1246.0   1246.0      0.0      ra = np.linspace(a_lb, a_ub, steps)
+   144         1        740.0    740.0      0.0      rb = np.linspace(b_lb, b_ub, steps)
+   145                                               
+   146         1       1036.0   1036.0      0.0      x_values = np.round(np.linspace(0, 1, n_points+2), 3) # values of x on the curve that will be used to create the approximation
+   147                                               
+   148         1         24.0     24.0      0.0      lyapunov_grid = []
+   149                                               
+   150         1        448.0    448.0      0.0      total_x_interval = np.amax(x_values) - np.amin(x_values)
+   151                                               
+   152                                               
+   153                                               # create functions for linear approximation
+   154                                               
+   155                                           #     @jit # Object Mode Warning
+   156         1         26.0     26.0      0.0      def create_pwfunc_list(range_of_r):
+   157                                               
+   158                                                   func_list = [0 for r in range(len(range_of_r))]
+   159                                           
+   160                                                   for r_i, r in enumerate(range_of_r):
+   161                                                       # create the piecewise functions for that ra value
+   162                                                       func = PWApprx(x_values, r)
+   163                                                       func_list[r_i] = func
+   164                                           
+   165                                                   return func_list    
+   166                                                   
+   167         1    5212438.0 5212438.0      0.2      func_list_a  = create_pwfunc_list(ra)
+   168                                               
+   169         1         33.0     33.0      0.0      if not a_lb == b_lb and a_ub == b_ub:
+   170                                                   func_list_b = create_pwfunc_list(rb)     
+   171                                               else:
+   172         1         21.0     21.0      0.0          func_list_b = func_list_a
+   173                                           
+   174         1         27.0     27.0      0.0      n_equations = len(x_values)-1
+   175                                               
+   176         1        212.0    212.0      0.0      zeros = np.zeros((n_equations,n_equations))
+   177       127       3035.0     23.9      0.0      for z_i, z in enumerate(zeros):
+   178       126       2896.0     23.0      0.0          z[z_i] = -1
+   179                                               
+   180         1     647956.0 647956.0      0.0      p = [(calc_equal_portion(n_equations, total_x_interval)/2) for i in range(n_equations * 2)]
+   181         1         97.0     97.0      0.0      ans = np.zeros(len(p))
+   182         1         39.0     39.0      0.0      ans[-1] = 1
+   183         1         23.0     23.0      0.0      bottoms = []
+   184         1         21.0     21.0      0.0      right_csc_matrices = []
+   185                                               
+   186                                           #     @jit # Object Mode Warning
+   187         1         24.0     24.0      0.0      def lyapunov_from_matrix(matrix, slopes):
+   188                                                   solution = np.linalg.solve(matrix, ans)
+   189                                                   
+   190                                                   return np.sum(p * solution * np.log(np.abs(slopes)))
+   191                                               
+   192         1         22.0     22.0      0.0      def lyapunov_from_sparse_matrix(sparse_matrix, slopes):
+   193                                                   # sparse matrix is a matrix in csc or csr form
+   194                                                   
+   195                                                   solution = spsolve(sparse_matrix, ans)
+   196                                               
+   197                                                   return np.sum(p * solution * np.log(np.abs(slopes)))
+   198                                               
+   199                                               # counts the number of times a singular matrix is encountered
+   200         1         22.0     22.0      0.0      singularities = 0
+   201                                               # counts the number of times a lyap exponent is far below the normal, possibly caused by an approach to negative infinity in the log
+   202         1         21.0     21.0      0.0      negative_outliers = 0
+   203                                               
+   204         1         38.0     38.0      0.0      v_precent_interval = max(int(steps/20), 1)
+   205                                               
+   206                                               # Calc Lyapunov using CSC Matrices
+   207                                               # Info about CSC form
+   208                                               # https://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_column_(CSC_or_CCS)
+   209                                               # https://scipy-lectures.org/advanced/scipy_sparse/csc_matrix.html
+   210                                               
+   211         1         24.0     24.0      0.0      def create_left_csc_matrix(y_values):
+   212                                                   
+   213                                                   # For each column the left side of the matrix will be the same, the change in the 
+   214                                                   left_data = []
+   215                                                   left_indices = []
+   216                                                   left_indptrs = []
+   217                                                   left_indptr = 0 # index pointer
+   218                                                   left_indptrs.append(left_indptr)
+   219                                           
+   220                                                   # Left Half of Matrix
+   221                                                   for i in range(len(x_values)):
+   222                                                       # Columns
+   223                                                       if i != 0: 
+   224                                                           # Add the diagonal of negative 1s to the top half of the left side
+   225                                                           left_data.append(-1) # the data array holds the nonzero values
+   226                                                           left_indices.append(i - 1) # row index
+   227                                                           left_indptr = left_indptr + 1 # each time we add a new row index add on to the index pointer signifying another entry in that column
+   228                                           
+   229                                                           # The way our data is structured after seeing the values the rest of the row except for the last column will be zero
+   230                                                           seen_non_zero = False
+   231                                                           
+   232                                                           for j in range(len(x_values)):
+   233                                                               # Rows
+   234                                                               if j != 0 and j != n_equations:  
+   235                                                                   weight = calc_weight(x_values[j-1],x_values[j], min(y_values[i-1],y_values[i]),max(y_values[i-1],y_values[i]))
+   236                                                                   # Add non zero weights to the row
+   237                                                                   if weight != 0:
+   238                                                                       left_data.append(weight)
+   239                                                                       left_indices.append(j + n_equations - 1)
+   240                                                                       left_indptr = left_indptr + 1
+   241                                                                       seen_non_zero = True
+   242                                                                   elif seen_non_zero:
+   243                                                                       # if zero is seen after not seeing zero
+   244                                                                       break
+   245                                                           
+   246                                                           # append the proportions to the last row
+   247                                                           left_data.append(p[i-1])
+   248         1         22.0     22.0      0.0                  left_indices.append((2 * n_equations) - 1)
+   249                                                           left_indptr = left_indptr + 1
+   250                                           
+   251                                                           left_indptrs.append(left_indptr) # at the end of the column appened the index pointer to the list of pointers
+   252                                           
+   253                                                   return (left_data, left_indices, left_indptrs)
+   254                                                   
+   255                                               def create_right_csc_matrix(y_values_b):
+   256                                                   # The create right matrix func is very similiar but the order of some things are switched around
+   257                                                   # The negatives 1s on the diagonal must be added after the weights are
+   258                                                   
+   259                                                   right_data = []
+   260                                                   right_indices = []
+   261                                                   right_indptrs = []
+   262                                                   right_indptr = 0 # index pointer
+   263                                                   right_indptrs.append(right_indptr)
+   264                                           
+   265                                                   # Right Half of Matrix
+   266                                                   for i in range(len(x_values)):
+   267                                                       # Columns
+   268                                                       if i != 0: 
+   269                                                           for j in range(len(x_values)):
+   270                                                               # Rows
+   271                                                               if j != 0:  
+   272                                                                   weight = calc_weight(x_values[j-1],x_values[j], min(y_values_b[i-1],y_values_b[i]),max(y_values_b[i-1],y_values_b[i]))
+   273                                                                   if weight != 0:
+   274                                                                       right_data.append(weight)
+   275                                                                       right_indices.append(j - 1)
+   276                                                                       right_indptr = right_indptr + 1
+   277                                                                       seen_non_zero = True
+   278                                                                   elif seen_non_zero:
+   279                                                                       # if zero is seen after not seeing zero
+   280                                                                       break
+   281                                           
+   282                                                           if i < n_equations:
+   283                                                               right_data.append(-1)
+   284                                                               right_indices.append(i + n_equations - 1)
+   285                                                               right_indptr = right_indptr + 1
+   286                                           
+   287                                                           right_data.append(p[i+n_equations - 1])
+   288                                                           right_indices.append((n_equations*2)-1)
+   289         1         23.0     23.0      0.0                  right_indptr = right_indptr + 1
+   290                                           
+   291                                                           right_indptrs.append(right_indptr)
+   292                                                           
+   293                                                   return (right_data, right_indices, right_indptrs)
+   294                                           
+   295                                           
+   296                                               def fuse_LR_matrices(left_csc_matrix, right_csc_matrix):
+   297                                                   # concatenate data and indices lists
+   298                                                   data = left_csc_matrix[0] + right_csc_matrix[0]
+   299                                           #         print(len(data), (len(left_csc_matrix[0]) + len(right_csc_matrix[0])))
+   300                                                   indices = left_csc_matrix[1] + right_csc_matrix[1]
+   301                                                   # get the last indptr of the left array and add it to the elemnts of the right array because they come after
+   302                                                   adjusted_right_indptrs = np.add(right_csc_matrix[2], left_csc_matrix[2][-1])
+   303                                                   # remove the first element so it is not duplicated
+   304       501      15453.0     30.8      0.0  #         print(adjusted_right_indptrs)
+   305                                                   adjusted_right_indptrs = np.delete(adjusted_right_indptrs, 0)
+   306       500      13404.0     26.8      0.0          indptrs = np.concatenate((left_csc_matrix[2], adjusted_right_indptrs))
+   307        20      62410.0   3120.5      0.0          
+   308                                                   return (data, indices, indptrs)
+   309       500      11669.0     23.3      0.0      
+   310       500      20217.0     40.4      0.0      
+   311       500      14266.0     28.5      0.0      for a_i, a in enumerate(ra):
+   312                                                   
+   313       500  237673475.0 475347.0      8.9          if a_i % v_precent_interval == 0:
+   314                                                       print("a = {}, {:2.2%} done {} seconds elapsed".format(a, (a_i/steps), (time.time() - start)))
+   315    250500    7131798.0     28.5      0.3          
+   316                                                   lyapunov_row = []
+   317    250000    9171890.0     36.7      0.3          y_values_a = func_list_a[a_i].get_y_values()
+   318    250000    7276367.0     29.1      0.3          slopes_a = func_list_a[a_i].get_slope_list()
+   319                                                   
+   320    250000    5987903.0     24.0      0.2          left_csc_matrix = create_left_csc_matrix(y_values_a)
+   321       500  210657643.0 421315.3      7.9          
+   322                                                   for b_i, b in enumerate(rb):
+   323    250000  159065919.0    636.3      6.0              
+   324                                                       y_values_b = func_list_b[b_i].get_y_values()
+   325    250000  800461332.0   3201.8     30.0              slopes_b = func_list_a[b_i].get_slope_list()
+   326                                                       
+   327    250000   12703020.0     50.8      0.5              if a_i == 0:           
+   328                                                           right_csc_matrices.append(create_right_csc_matrix(y_values_b))
+   329                                                           
+   330                                                       full_matrix_tuple = fuse_LR_matrices(left_csc_matrix, right_csc_matrices[b_i])
+   331    250000    5867071.0     23.5      0.2              
+   332    250000 1183762370.0   4735.0     44.4              full_matrix = csc_matrix(full_matrix_tuple, shape=(2 * n_equations, 2 * n_equations))
+   333                                                       
+   334    250000   11271485.0     45.1      0.4              slopes = slopes_a + slopes_b
+   335                                                       
+   336                                           #             lyapunov_ex = lyapunov_from_sparse_matrix(sparse_matrix, slopes)
+   337       253       6272.0     24.8      0.0              
+   338       253       6279.0     24.8      0.0              try:
+   339                                                           lyapunov_ex = lyapunov_from_sparse_matrix(full_matrix, slopes)
+   340                                                           
+   341                                                           if lyapunov_ex < -4:
+   342                                           #                     print(a, b)
+   343                                           #                     print(matrix)
+   344                                                               negative_outliers = negative_outliers + 1
+   345                                                               lyapunov_ex = -4
+   346                                                   
+   347                                           
+   348                                                       except:
+   349                                           #                 print(a, b)
+   350    250000    7015464.0     28.1      0.3  #                 print(matrix)
+   351                                                           singularities = singularities + 1
+   352       500      13342.0     26.7      0.0                  
+   353                                           #                 lyapunov_ex = iterative_lyapunov(n_warmups, n_iter, a, b, x_0) # use iterative method to compute places where invariant measure fails
+   354                                           #                 print(lyapunov_ex)
+   355                                                           lyapunov_ex = 0
+   356                                               
+   357                                                       lyapunov_row.append(lyapunov_ex)
+   358                                               
+   359                                                   lyapunov_grid.append(lyapunov_row)
+   360                                                      
+   361                                               
+   362                                               # Calc Lyapunoc using Regular Matrices
+   363                                               
+   364                                           #     for b_i, b in enumerate(rb):
+   365                                                   
+   366                                           #         y_values_b = func_list_b[b_i].get_y_values()
+   367                                           #         top_right_square = []
+   368                                                   
+   369                                           #         for i in range(len(x_values)):
+   370                                           #             if i != 0:      
+   371                                           #                 w_i = []
+   372                                           #                 for j in range(len(x_values)):
+   373                                           #                     if j != 0:  
+   374                                           #                         # Top Right Square
+   375                                           #                         weight = calc_weight(x_values[i-1],x_values[i], min(y_values_b[j-1],y_values_b[j]),max(y_values_b[j-1],y_values_b[j]))
+   376                                           #                         w_i.append(weight)
+   377                                                                       
+   378                                                      
+   379                                           #                 top_right_square.append(w_i)
+   380                                                   
+   381                                           #         if b_i % (max(int(steps/20), 1)) == 0:
+   382                                           #             print("b = {:1.3}, {:2.2%} done".format(b, (b_i/steps)))
+   383                                           #         lyapunov_row = []
+   384                                                   
+   385                                           #         # needed to compute lyapunov exponent
+   386                                           #         slopes_b = func_list_b[b_i].get_slope_list()
+   387                                                   
+   388                                           #         top = np.concatenate((zeros, top_right_square), axis = 1)
+   389                                                   
+   390                                           #         for a_i, a in enumerate(ra):
+   391                                                       
+   392                                           #             if b_i == 0:
+   393                                           #                 y_values_a = func_list_b[a_i].get_y_values()
+   394                                           #                 matrix = []
+   395                                           
+   396                                           #                 for i in range(len(x_values)):
+   397                                           #                     if i != 0:      
+   398                                           #                         w_i = []
+   399                                           #                         for j in range(len(x_values)):
+   400                                           #                             if j != 0:  
+   401                                           #                                 # Bottom Left Square
+   402                                           #                                 weight = calc_weight(x_values[i-1],x_values[i], min(y_values_a[j-1],y_values_a[j]),max(y_values_a[j-1],y_values_a[j]))
+   403                                           #                                 w_i.append(weight) 
+   404                                           #                         matrix.append(w_i)
+   405                                                           
+   406                                           #                 bottom = np.concatenate((matrix, zeros), axis = 1)
+   407                                           #                 bottoms.append(bottom)
+   408                                                       
+   409                                           #             matrix = np.concatenate((top, bottoms[a_i]))
+   410                                           #             matrix[-1] = p
+   411                                                       
+   412                                           #             print(matrix)
+   413                                                       
+   414                                           #             slopes_a = func_list_a[a_i].get_slope_list()
+   415                                           #             slopes = slopes_a + slopes_b
+   416                                                       
+   417                                           #             try:
+   418                                           #                 lyapunov_ex = lyapunov_from_matrix(matrix, slopes)
+   419                                                           
+   420                                           #                 if lyapunov_ex < -4:
+   421                                           # #                     print(a, b)
+   422                                           # #                     print(matrix)
+   423                                           #                     negative_outliers = negative_outliers + 1
+   424                                           #                     lyapunov_ex = -4
+   425                                           #             except:
+   426                                           # #                 print(a, b)
+   427                                           # #                 print(matrix)
+   428                                           #                 singularities = singularities + 1
+   429                                                           
+   430                                           # #                 lyapunov_ex = iterative_lyapunov(n_warmups, n_iter, a, b, x_0) # use iterative method to compute places where invariant measure fails
+   431                                           # #                 print(lyapunov_ex)
+   432                                           #                 lyapunov_ex = 0
+   433                                                           
+   434                                                   
+   435         1       1467.0   1467.0      0.0  # #             lyapunov_ex = lyapunov_from_matrix(matrix, slopes)
+   436         1        571.0    571.0      0.0              
+   437                                           #             lyapunov_row.append(lyapunov_ex)
+   438         1         24.0     24.0      0.0              
+   439                                           #         lyapunov_grid.append(lyapunov_row)
+   440                                               
+   441                                               
+   442                                               print("Singularities: " + str(singularities))
+   443                                               print("Negative Outliers: " + str(negative_outliers))
+   444                                               
+   445                                               if savefile:
+   446         1     383642.0 383642.0      0.0          f = open("invariat_fractal_apprx n_points= " + str(n_points) + " steps=" + str(steps) + ".dat", "wb")
+   447                                                   lyapunov_grid = np.ascontiguousarray(lyapunov_grid)
+   448         1        202.0    202.0      0.0          f.write(lyapunov_grid)
+   449                                                   f.close()
+   450                                               
+   451         1        548.0    548.0      0.0      # plot information
+   452         1        124.0    124.0      0.0      
+   453                                               fig, ax = plt.subplots(figsize=(10, 9))
+   454                                               
+   455                                               fig.patch.set_facecolor('white')
+   456         1     229387.0 229387.0      0.0      
+   457                                           #     lya_cmap = copy.copy(mpl.cm.get_cmap('viridis'))
+   458         1     478578.0 478578.0      0.0      lya_cmap = copy.copy(mpl.cm.get_cmap('jet'))
+   459         1       2399.0   2399.0      0.0      lya_cmap.set_over('black')
+   460         1       2562.0   2562.0      0.0  #     lya_cmap.set_under('white')
+   461                                           #     lya_cmap.set_bad('black')
+   462         1         81.0     81.0      0.0      
+   463         1         37.0     37.0      0.0      plt.imshow(lyapunov_grid , cmap = lya_cmap, origin = 'lower', vmax = 0, vmin = -4)
+   464                                               
+   465         1        622.0    622.0      0.0      plt.colorbar()
+   466         1        428.0    428.0      0.0      plt.suptitle("Lyapunov Logistic Fractal - Linear Apprx")
+   467                                               plt.title("steps = " + str(steps) + " n_points = " + str(n_points))  
+   468         1        837.0    837.0      0.0      
+   469         1        701.0    701.0      0.0      xticks = np.arange(a_lb, a_ub, .2)
+   470                                               yticks = np.arange(b_lb, b_ub, .2)
+   471         1         24.0     24.0      0.0      
+   472                                               plt.xlabel("A")  
+   473                                               plt.ylabel("B") 
+   474         1    2296973.0 2296973.0      0.1      
+   475                                               plt.xticks([])
+   476         1         65.0     65.0      0.0      plt.yticks([])
+   477                                               
+   478         1       2949.0   2949.0      0.0      if(savepng):
+   479                                                   plt.savefig("invariat_fractal_apprx csc n_points = "+ str(n_points) +".png")
+   480                                               
+   481                                               plt.show()
+   482                                               
+   483                                               end = time.time()
+   484                                           
+   485                                               print("This took", end - start, "seconds to execute")
